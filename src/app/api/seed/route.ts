@@ -40,12 +40,12 @@ export async function POST() {
 
     // Seed navigation links
     const navLinks = [
-      { label: "Home", href: "#home", active: false, sortOrder: 0 },
-      { label: "Soluções", href: "#solucoes", active: true, sortOrder: 1 },
-      { label: "Segmentos", href: "#segmentos", active: false, sortOrder: 2 },
-      { label: "Cases", href: "#cases", active: false, sortOrder: 3 },
-      { label: "Sobre", href: "#sobre", active: false, sortOrder: 4 },
-      { label: "Contato", href: "#contato", active: false, sortOrder: 5 },
+      { label: "Home", href: "/", active: false, sortOrder: 0 },
+      { label: "Soluções", href: "/solucoes", active: false, sortOrder: 1 },
+      { label: "Segmentos", href: "/segmentos", active: false, sortOrder: 2 },
+      { label: "Cases", href: "/cases", active: false, sortOrder: 3 },
+      { label: "Sobre", href: "/sobre", active: false, sortOrder: 4 },
+      { label: "Contato", href: "/contato", active: false, sortOrder: 5 },
     ];
 
     for (const link of navLinks) {

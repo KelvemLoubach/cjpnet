@@ -1,46 +1,32 @@
 ---
-Task ID: 1
+Task ID: 2
 Agent: Main Agent
-Task: Transform HTML institutional site into Next.js CMS with authentication, inline editing, and scroll animations
+Task: Restructure CMS to separate pages, invisible admin, URL-based admin access
 
 Work Log:
-- Analyzed the original HTML code.html file and DESIGN.md for the CJP NET institutional site
-- Designed and implemented Prisma schema with User, SiteContent, Service, NavLink, FooterLink models
-- Pushed schema to SQLite database with `bun run db:push`
-- Set up NextAuth authentication with credentials provider
-- Created custom login API at /api/auth/login for simpler client-side authentication
-- Built comprehensive API routes for CRUD operations: /api/content, /api/services, /api/navigation, /api/footer, /api/seed
-- Seeded database with default admin user (admin@cjpnet.com.br / admin123) and all site content
-- Created Zustand admin store for managing edit mode state
-- Built complete frontend with Framer Motion scroll animations:
-  - Navigation with scroll-aware background blur
-  - Hero section with parallax scrolling, floating particles, overlay stats
-  - Services section with bento grid, stagger animations, hover effects
-  - Metrics section with animated counters
-  - Cases section with dark theme cards
-  - About section with sticky sidebar and value cards
-  - Segmentos section with grid layout
-  - Contact section with form
-  - CTA section with gradient background
-  - Footer with links
-- Implemented CMS editing:
-  - Admin toolbar (floating, bottom-right) with login/edit/logout
-  - Login dialog with email/password
-  - Edit mode with visual hover indicators (dashed outlines + "Editar" labels)
-  - Content editing dialogs for all text fields
-  - Service editing dialog with icon picker, checklist management
-  - Navigation and footer link editing
-  - Add new service capability
-- Generated hero image using z-ai image generation SDK
-- Applied CJP NET design system colors and typography
-- All lint checks pass (only 1 warning about custom fonts which is expected)
-- All API endpoints returning 200 status
+- Removed floating admin button from all public pages (completely invisible)
+- Created /admin route with login page (hardcoded auth via backend API)
+- Split single-page site into 7 separate pages:
+  - / (Home) - Hero, services preview, metrics, CTA
+  - /solucoes - Full services listing
+  - /segmentos - Industry segments
+  - /cases - Case studies with dark theme
+  - /sobre - About with timeline and values
+  - /contato - Contact form and info
+  - /admin - CMS admin panel with sidebar navigation
+- Created shared components: Navigation, Footer, PageLayout, Animations
+- Updated navigation links in database to use route paths (/solucoes, /cases, etc.)
+- Built comprehensive admin panel at /admin with:
+  - Login screen with email/password
+  - Sidebar navigation between Content, Services, Navigation, Footer tabs
+  - Full CRUD for all content, services, nav links, footer links
+  - "Ver Site" link to preview changes
+- Authentication: admin@cjpnet.com.br / admin123
+- Session stored in sessionStorage for persistence during session
+- All lint checks pass, all pages return 200
 
 Stage Summary:
-- Complete CMS institutional site built with Next.js 16
-- Authentication: admin@cjpnet.com.br / admin123
-- All content is editable from the frontend when logged in as admin
-- Beautiful scroll animations with Framer Motion throughout
-- Responsive design with mobile navigation
-- Database: SQLite via Prisma ORM
-- Design system: CJP NET corporate blue palette with Hanken Grotesk + Inter fonts
+- Complete multi-page institutional site with separate routes
+- Admin panel accessible only via /admin URL (invisible on public pages)
+- All content fully editable through the admin CMS
+- Beautiful scroll animations maintained on all pages
