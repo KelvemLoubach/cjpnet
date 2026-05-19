@@ -1,99 +1,180 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import PageLayout from "@/components/shared/page-layout";
-import { AnimatedSection, StaggerContainer, StaggerItem, PageHero, SectionTag, SectionTagDark } from "@/components/shared/animations";
+import {
+  AnimatedSection,
+  StaggerContainer,
+  StaggerItem,
+  PageHero,
+} from "@/components/shared/animations";
 import { useSiteData } from "@/hooks/use-site-data";
-
-const cases = [
-  {
-    client: "Banco Institucional",
-    segment: "Financeiro",
-    result: "Redução de 60% no tempo de processamento de dados",
-    description: "Implementação de data lake e pipelines de integração para consolidação de dados de múltiplas fontes legadas. Migração de sistemas on-premise para arquitetura cloud-native com alta disponibilidade.",
-    metrics: ["60% mais rápido", "Zero downtime na migração", "3x mais consultas simultâneas"],
-  },
-  {
-    client: "Rede Hospitalar Nacional",
-    segment: "Saúde",
-    result: "99.97% de uptime no sistema crítico",
-    description: "Arquitetura SaaS multi-tenant para gestão de prontuários e integração com sistemas de convênios. Conformidade total com LGPD e normas de saúde digital.",
-    metrics: ["99.97% uptime", "200+ hospitais integrados", "LGPD compliant"],
-  },
-  {
-    client: "Operadora Logística",
-    segment: "Indústria",
-    result: "3x mais velocidade nas operações",
-    description: "Automação de processos e dashboards operacionais em tempo real para rastreamento de frota. Integração com IoT para monitoramento contínuo.",
-    metrics: ["3x mais rápido", "5.000+ ativos rastreados", "Tempo real"],
-  },
-];
+import { getContentValue, parseHighlights } from "@/lib/types";
 
 export default function CasesPage() {
-  const { contents } = useSiteData();
+  const { contents, cases } = useSiteData();
+
+  const sortedCases = [...cases].sort(
+    (a, b) => a.sortOrder - b.sortOrder
+  );
 
   return (
     <PageLayout>
       <PageHero
         tag="Cases"
-        title="Resultados que Falam por Si"
-        description="Conheça alguns dos projetos onde nossa engenharia fez a diferença em operações críticas."
+        title="Casos de Aplicação"
+        description="Conheça projetos reais onde nossas soluções transformaram operações corporativas."
       />
 
-      {/* Dark featured section */}
-      <section className="py-20 md:py-28 bg-cjp-primary relative overflow-hidden">
-        <div className="absolute inset-0 circuit-pattern opacity-10" />
-        <div className="absolute top-0 left-0 w-96 h-96 bg-inverse-primary/5 rounded-full -translate-y-1/2 -translate-x-1/2 blur-3xl" />
-        <div className="max-w-[1280px] mx-auto px-4 md:px-10 relative z-10">
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {cases.map((caseItem, i) => (
-              <StaggerItem key={i}>
-                <motion.div
-                  whileHover={{ y: -8, boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)" }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  className="bg-on-primary/10 backdrop-blur-sm border border-on-primary/20 rounded-xl p-8 h-full flex flex-col"
-                >
-                  <Badge className="bg-inverse-primary/20 text-inverse-primary hover:bg-inverse-primary/30 w-fit mb-4 border-0">
-                    {caseItem.segment}
-                  </Badge>
-                  <h3 className="text-xl font-bold text-on-primary mb-3" style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}>
-                    {caseItem.client}
-                  </h3>
-                  <p className="text-inverse-primary/80 text-sm leading-relaxed mb-6 flex-1">
-                    {caseItem.description}
-                  </p>
-                  <div className="pt-4 border-t border-on-primary/20 flex flex-col gap-2">
-                    {caseItem.metrics.map((metric, j) => (
-                      <div key={j} className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-inverse-primary shrink-0" />
-                        <span className="text-sm font-medium text-on-primary">{metric}</span>
-                      </div>
-                    ))}
+      {/* Case Studies */}
+      <section className="pb-0">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-10">
+          <StaggerContainer className="flex flex-col gap-0">
+            {sortedCases.map((caseStudy, i) => {
+              const highlights = parseHighlights(caseStudy.highlights);
+              const paragraphs = caseStudy.description.split("\n\n");
+              const isEven = i % 2 === 0;
+
+              return (
+                <StaggerItem key={caseStudy.id}>
+                  <div
+                    className={`py-16 md:py-20 ${
+                      isEven
+                        ? "bg-white"
+                        : "bg-surface-container-low"
+                    } -mx-4 md:-mx-10 px-4 md:px-10`}
+                  >
+                    <div className="max-w-[1280px] mx-auto">
+                      <AnimatedSection>
+                        <div className="flex flex-col gap-6">
+                          {/* Segment Badge */}
+                          <Badge
+                            className="w-fit border-0 text-sm font-medium px-3.5 py-1.5 rounded-full"
+                            style={{
+                              backgroundColor: "rgba(88, 69, 204, 0.1)",
+                              color: "#5845cc",
+                            }}
+                          >
+                            {caseStudy.segment}
+                          </Badge>
+
+                          {/* Title */}
+                          <h2
+                            className="text-2xl md:text-3xl font-bold text-[#0a1628] tracking-tight"
+                            style={{
+                              fontFamily:
+                                "'Hanken Grotesk', sans-serif",
+                            }}
+                          >
+                            {caseStudy.title}
+                          </h2>
+
+                          {/* Description paragraphs */}
+                          <div className="flex flex-col gap-4 max-w-4xl">
+                            {paragraphs.map((paragraph, pIdx) => (
+                              <p
+                                key={pIdx}
+                                className="text-base md:text-lg text-[#464750] leading-relaxed"
+                              >
+                                {paragraph}
+                              </p>
+                            ))}
+                          </div>
+
+                          {/* Highlights */}
+                          {highlights.length > 0 && (
+                            <div className="mt-4 pt-6 border-t border-outline-variant">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {highlights.map(
+                                  (highlight: string, hIdx: number) => (
+                                    <motion.div
+                                      key={hIdx}
+                                      initial={{ opacity: 0, x: -10 }}
+                                      whileInView={{
+                                        opacity: 1,
+                                        x: 0,
+                                      }}
+                                      viewport={{ once: true }}
+                                      transition={{
+                                        delay: hIdx * 0.08,
+                                        duration: 0.4,
+                                      }}
+                                      className="flex items-start gap-3"
+                                    >
+                                      <div
+                                        className="mt-0.5 w-5 h-5 flex items-center justify-center rounded-full shrink-0"
+                                        style={{
+                                          backgroundColor:
+                                            "rgba(88, 69, 204, 0.12)",
+                                        }}
+                                      >
+                                        <Check
+                                          className="h-3 w-3"
+                                          style={{
+                                            color: "#5845cc",
+                                          }}
+                                        />
+                                      </div>
+                                      <span className="text-sm md:text-base font-medium text-[#0a1628]">
+                                        {highlight}
+                                      </span>
+                                    </motion.div>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </AnimatedSection>
+                    </div>
                   </div>
-                </motion.div>
-              </StaggerItem>
-            ))}
+                </StaggerItem>
+              );
+            })}
           </StaggerContainer>
         </div>
       </section>
 
-      <section className="py-20 md:py-28 bg-surface-container-lowest">
-        <div className="max-w-[1280px] mx-auto px-4 md:px-10 text-center">
+      {/* CTA Section */}
+      <section className="py-20 md:py-28 bg-[#0a1628] relative overflow-hidden">
+        <div className="absolute inset-0 circuit-pattern opacity-10" />
+        <div className="absolute top-0 left-0 w-96 h-96 bg-cjp-accent/5 rounded-full -translate-y-1/2 -translate-x-1/2 blur-3xl" />
+        <div className="max-w-[1280px] mx-auto px-4 md:px-10 text-center relative z-10">
           <AnimatedSection>
-            <h2 className="text-3xl font-bold text-cjp-primary mb-4" style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}>
+            <h2
+              className="text-3xl md:text-4xl font-bold text-white mb-4"
+              style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+            >
               Quer ser o próximo case de sucesso?
             </h2>
-            <p className="text-lg text-on-surface-variant mb-8 max-w-xl mx-auto">
-              Entre em contato e descubra como podemos transformar sua operação.
+            <p className="text-lg text-[#8da4cc] mb-10 max-w-xl mx-auto">
+              Entre em contato e descubra como podemos transformar sua
+              operação com soluções digitais sob medida.
             </p>
-            <a href="/contato">
-              <Button className="bg-cjp-primary text-on-primary hover:bg-primary-container h-12 px-8 rounded">
-                Iniciar Projeto <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </a>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a
+                href="https://wa.me/5511914922773"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button className="bg-cjp-accent hover:bg-cjp-accent-light text-white h-12 px-8 rounded-lg font-medium text-sm transition-all duration-300 hover:shadow-lg hover:shadow-cjp-accent/25">
+                  <MessageCircle className="mr-2 h-5 w-5" />
+                  Falar com um Especialista
+                </Button>
+              </a>
+              <a href="/contato">
+                <Button
+                  variant="outline"
+                  className="border-white/20 text-white hover:bg-white/10 h-12 px-8 rounded-lg font-medium text-sm bg-transparent"
+                >
+                  Fale Conosco
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </a>
+            </div>
           </AnimatedSection>
         </div>
       </section>

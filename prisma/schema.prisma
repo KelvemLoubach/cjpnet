@@ -44,6 +44,29 @@ model Service {
   updatedAt   DateTime @updatedAt
 }
 
+model Segment {
+  id          String  @id @default(cuid())
+  title       String
+  subtitle    String
+  description String
+  applications String @default("[]")
+  icon        String  @default("globe")
+  sortOrder   Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CaseStudy {
+  id          String  @id @default(cuid())
+  title       String
+  segment     String
+  description String
+  highlights  String  @default("[]")
+  sortOrder   Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model NavLink {
   id        String   @id @default(cuid())
   label     String

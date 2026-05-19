@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useSyncExternalStore, useCallback, useRef } from "react";
+import { useState, useSyncExternalStore, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LogOut, Save, Plus, Trash2, Edit3, ChevronRight,
+  LogOut, Save, Plus, Trash2, Edit3,
   Cloud, GitMerge, ShieldCheck, Blocks, Zap, Globe, Database, Lock, Cpu, BarChart3,
-  LayoutDashboard, FileText, Settings, ArrowLeft,
+  LayoutDashboard, FileText, Settings, ArrowLeft, Target, Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import type { SiteContent, Service, NavLink, FooterLink } from "@/lib/types";
-import { getContentValue, parseCheckItems } from "@/lib/types";
+import type { SiteContent, Service, Segment, CaseStudy, NavLink, FooterLink } from "@/lib/types";
+import { getContentValue, parseCheckItems, parseApplications, parseHighlights } from "@/lib/types";
 
 const iconMap: Record<string, React.ReactNode> = {
   cloud: <Cloud className="h-5 w-5" />,
@@ -30,10 +30,7 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 const iconNames = Object.keys(iconMap);
 
-const ADMIN_EMAIL = "admin@cjpnet.com.br";
-const ADMIN_PASSWORD = "admin123";
-
-type AdminTab = "conteudo" | "servicos" | "navegacao" | "footer";
+type AdminTab = "conteudo" | "servicos" | "segmentos" | "cases" | "navegacao" | "footer";
 
 // ==================== LOGIN SCREEN ====================
 function LoginScreen({ onLogin }: { onLogin: () => void }) {
@@ -75,9 +72,7 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-cjp-primary mb-2" style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}>
-            CJP NET
-          </h1>
+          <img src="/logo.png" alt="CJP NET" className="h-10 mx-auto mb-4" />
           <p className="text-on-surface-variant">Painel Administrativo</p>
         </div>
 
@@ -132,23 +127,27 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState<AdminTab>("conteudo");
   const [contents, setContents] = useState<SiteContent[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const [cases, setCases] = useState<CaseStudy[]>([]);
   const [navLinks, setNavLinks] = useState<NavLink[]>([]);
   const [footerLinks, setFooterLinks] = useState<FooterLink[]>([]);
   const { toast } = useToast();
 
-  // Fetch data on mount - use null check pattern to run once
+  // Fetch data on mount
   const fetchDataRef = useRef<Promise<void> | null>(null);
   if (fetchDataRef.current == null) {
     fetchDataRef.current = (async () => {
       try {
-        const [contentRes, servicesRes, navRes, footerRes] = await Promise.all([
-          fetch("/api/content"), fetch("/api/services"), fetch("/api/navigation"), fetch("/api/footer"),
+        const [contentRes, servicesRes, segmentsRes, casesRes, navRes, footerRes] = await Promise.all([
+          fetch("/api/content"), fetch("/api/services"), fetch("/api/segments"), fetch("/api/cases"), fetch("/api/navigation"), fetch("/api/footer"),
         ]);
-        const [contentData, servicesData, navData, footerData] = await Promise.all([
-          contentRes.json(), servicesRes.json(), navRes.json(), footerRes.json(),
+        const [contentData, servicesData, segmentsData, casesData, navData, footerData] = await Promise.all([
+          contentRes.json(), servicesRes.json(), segmentsRes.json(), casesRes.json(), navRes.json(), footerRes.json(),
         ]);
         setContents(contentData);
         setServices(servicesData);
+        setSegments(segmentsData);
+        setCases(casesData);
         setNavLinks(navData);
         setFooterLinks(footerData);
       } catch (error) {
@@ -159,14 +158,16 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
   const fetchDataCb = useCallback(async () => {
     try {
-      const [contentRes, servicesRes, navRes, footerRes] = await Promise.all([
-        fetch("/api/content"), fetch("/api/services"), fetch("/api/navigation"), fetch("/api/footer"),
+      const [contentRes, servicesRes, segmentsRes, casesRes, navRes, footerRes] = await Promise.all([
+        fetch("/api/content"), fetch("/api/services"), fetch("/api/segments"), fetch("/api/cases"), fetch("/api/navigation"), fetch("/api/footer"),
       ]);
-      const [contentData, servicesData, navData, footerData] = await Promise.all([
-        contentRes.json(), servicesRes.json(), navRes.json(), footerRes.json(),
+      const [contentData, servicesData, segmentsData, casesData, navData, footerData] = await Promise.all([
+        contentRes.json(), servicesRes.json(), segmentsRes.json(), casesRes.json(), navRes.json(), footerRes.json(),
       ]);
       setContents(contentData);
       setServices(servicesData);
+      setSegments(segmentsData);
+      setCases(casesData);
       setNavLinks(navData);
       setFooterLinks(footerData);
     } catch (error) {
@@ -202,6 +203,44 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     await fetch(`/api/services?id=${id}`, { method: "DELETE" });
     fetchDataCb();
     toast({ title: "Serviço excluído." });
+  };
+
+  // Segment handlers
+  const updateSegment = async (data: Partial<Segment> & { id?: string }) => {
+    const method = data.id ? "PUT" : "POST";
+    await fetch("/api/segments", {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    fetchDataCb();
+    toast({ title: "Segmento salvo!" });
+  };
+
+  const deleteSegment = async (id: string) => {
+    if (!confirm("Deseja realmente excluir este segmento?")) return;
+    await fetch(`/api/segments?id=${id}`, { method: "DELETE" });
+    fetchDataCb();
+    toast({ title: "Segmento excluído." });
+  };
+
+  // Case handlers
+  const updateCase = async (data: Partial<CaseStudy> & { id?: string }) => {
+    const method = data.id ? "PUT" : "POST";
+    await fetch("/api/cases", {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    fetchDataCb();
+    toast({ title: "Case salvo!" });
+  };
+
+  const deleteCase = async (id: string) => {
+    if (!confirm("Deseja realmente excluir este case?")) return;
+    await fetch(`/api/cases?id=${id}`, { method: "DELETE" });
+    fetchDataCb();
+    toast({ title: "Case excluído." });
   };
 
   // Nav handlers
@@ -244,7 +283,9 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
   const tabs: { key: AdminTab; label: string; icon: React.ReactNode }[] = [
     { key: "conteudo", label: "Conteúdo", icon: <FileText className="h-4 w-4" /> },
-    { key: "servicos", label: "Serviços", icon: <Blocks className="h-4 w-4" /> },
+    { key: "servicos", label: "Soluções", icon: <Blocks className="h-4 w-4" /> },
+    { key: "segmentos", label: "Segmentos", icon: <Target className="h-4 w-4" /> },
+    { key: "cases", label: "Cases", icon: <Briefcase className="h-4 w-4" /> },
     { key: "navegacao", label: "Navegação", icon: <LayoutDashboard className="h-4 w-4" /> },
     { key: "footer", label: "Footer", icon: <Settings className="h-4 w-4" /> },
   ];
@@ -254,13 +295,13 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       {/* Sidebar */}
       <aside className="w-64 bg-cjp-primary text-on-primary flex flex-col shrink-0">
         <div className="p-6 border-b border-on-primary/20">
-          <a href="/" className="text-xl font-bold" style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}>
-            CJP NET
+          <a href="/" className="flex items-center gap-2">
+            <img src="/logo.png" alt="CJP NET" className="h-7 brightness-0 invert" />
           </a>
-          <p className="text-inverse-primary text-xs mt-1">Painel Administrativo</p>
+          <p className="text-inverse-primary text-xs mt-2">Painel Administrativo</p>
         </div>
 
-        <nav className="flex-1 p-4 flex flex-col gap-1">
+        <nav className="flex-1 p-4 flex flex-col gap-1 overflow-y-auto max-h-[calc(100vh-160px)]">
           {tabs.map((tab) => (
             <button
               key={tab.key}
@@ -300,6 +341,12 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             {activeTab === "servicos" && (
               <ServicesTab key="servicos" services={services} onUpdate={updateService} onDelete={deleteService} />
             )}
+            {activeTab === "segmentos" && (
+              <SegmentsTab key="segmentos" segments={segments} onUpdate={updateSegment} onDelete={deleteSegment} />
+            )}
+            {activeTab === "cases" && (
+              <CasesTab key="cases" cases={cases} onUpdate={updateCase} onDelete={deleteCase} />
+            )}
             {activeTab === "navegacao" && (
               <NavTab key="navegacao" navLinks={navLinks} onUpdate={updateNavLink} onDelete={deleteNavLink} />
             )}
@@ -328,7 +375,10 @@ function ContentTab({ contents, onUpdate }: { contents: SiteContent[]; onUpdate:
   const groupLabels: Record<string, string> = {
     general: "Geral",
     hero: "Seção Hero",
-    services: "Serviços",
+    services: "Soluções",
+    sobre: "Sobre",
+    solucoes: "Soluções",
+    conteudo: "Conteúdo",
     footer: "Footer",
     geral: "Geral",
   };
@@ -433,17 +483,17 @@ function ServicesTab({ services, onUpdate, onDelete }: { services: Service[]; on
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-cjp-primary" style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}>
-          Gerenciar Serviços
+          Gerenciar Soluções
         </h2>
         <Button onClick={startNew} className="bg-cjp-primary text-on-primary">
-          <Plus className="h-4 w-4 mr-1" /> Novo Serviço
+          <Plus className="h-4 w-4 mr-1" /> Nova Solução
         </Button>
       </div>
 
       {(editingService || isNew) && (
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">
           <h3 className="text-lg font-bold text-cjp-primary mb-4">
-            {isNew ? "Novo Serviço" : `Editando: ${editingService?.title}`}
+            {isNew ? "Nova Solução" : `Editando: ${editingService?.title}`}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div className="flex flex-col gap-2">
@@ -451,8 +501,8 @@ function ServicesTab({ services, onUpdate, onDelete }: { services: Service[]; on
               <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
             </div>
             <div className="flex flex-col gap-2">
-              <Label>CTA Texto</Label>
-              <Input value={form.ctaText} onChange={(e) => setForm({ ...form, ctaText: e.target.value })} placeholder="Ex: Iniciar Projeto" />
+              <Label>Ordem</Label>
+              <Input type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: parseInt(e.target.value) || 0 })} />
             </div>
           </div>
           <div className="flex flex-col gap-2 mb-4">
@@ -475,34 +525,10 @@ function ServicesTab({ services, onUpdate, onDelete }: { services: Service[]; on
               ))}
             </div>
           </div>
-          <div className="flex items-center gap-4 mb-4">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={form.highlight} onChange={(e) => setForm({ ...form, highlight: e.target.checked })} />
-              <span className="text-sm">Destaque (fundo escuro)</span>
-            </label>
-            <div className="flex items-center gap-2">
-              <Label className="text-sm">Ordem:</Label>
-              <Input type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: parseInt(e.target.value) || 0 })} className="w-20" />
-            </div>
-          </div>
-          <div className="flex flex-col gap-2 mb-4">
-            <Label>Checklist</Label>
-            {form.checkItems.map((item, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Input value={item} onChange={(e) => { const items = [...form.checkItems]; items[i] = e.target.value; setForm({ ...form, checkItems: items }); }} />
-                <Button variant="ghost" size="sm" onClick={() => setForm({ ...form, checkItems: form.checkItems.filter((_, idx) => idx !== i) })}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
-            ))}
-            <div className="flex items-center gap-2">
-              <Input value={newCheckItem} onChange={(e) => setNewCheckItem(e.target.value)} placeholder="Novo item..."
-                onKeyDown={(e) => { if (e.key === "Enter" && newCheckItem) { setForm({ ...form, checkItems: [...form.checkItems, newCheckItem] }); setNewCheckItem(""); } }} />
-              <Button variant="outline" size="sm" onClick={() => { if (newCheckItem) { setForm({ ...form, checkItems: [...form.checkItems, newCheckItem] }); setNewCheckItem(""); } }}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <label className="flex items-center gap-2 mb-4">
+            <input type="checkbox" checked={form.highlight} onChange={(e) => setForm({ ...form, highlight: e.target.checked })} />
+            <span className="text-sm">Destaque (fundo escuro)</span>
+          </label>
           <div className="flex gap-2">
             <Button onClick={handleSave} className="bg-cjp-primary text-on-primary"><Save className="h-4 w-4 mr-1" /> Salvar</Button>
             <Button variant="outline" onClick={() => { setEditingService(null); setIsNew(false); }}>Cancelar</Button>
@@ -525,6 +551,252 @@ function ServicesTab({ services, onUpdate, onDelete }: { services: Service[]; on
             <div className="flex items-center gap-1 shrink-0">
               <Button variant="ghost" size="sm" onClick={() => startEdit(service)}><Edit3 className="h-4 w-4" /></Button>
               <Button variant="ghost" size="sm" onClick={() => onDelete(service.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// ==================== SEGMENTS TAB ====================
+function SegmentsTab({ segments, onUpdate, onDelete }: { segments: Segment[]; onUpdate: (data: Partial<Segment> & { id?: string }) => void; onDelete: (id: string) => void }) {
+  const [editingSegment, setEditingSegment] = useState<Segment | null>(null);
+  const [isNew, setIsNew] = useState(false);
+  const [form, setForm] = useState({
+    title: "", subtitle: "", description: "", icon: "globe", sortOrder: 0, applications: [] as string[],
+  });
+  const [newApp, setNewApp] = useState("");
+
+  const startEdit = (segment: Segment) => {
+    setEditingSegment(segment);
+    setIsNew(false);
+    setForm({
+      title: segment.title,
+      subtitle: segment.subtitle,
+      description: segment.description,
+      icon: segment.icon,
+      sortOrder: segment.sortOrder,
+      applications: parseApplications(segment.applications),
+    });
+  };
+
+  const startNew = () => {
+    setEditingSegment(null);
+    setIsNew(true);
+    setForm({ title: "", subtitle: "", description: "", icon: "globe", sortOrder: 0, applications: [] });
+  };
+
+  const handleSave = () => {
+    onUpdate({
+      ...(editingSegment?.id && { id: editingSegment.id }),
+      ...form,
+    });
+    setEditingSegment(null);
+    setIsNew(false);
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-cjp-primary" style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}>
+          Gerenciar Segmentos
+        </h2>
+        <Button onClick={startNew} className="bg-cjp-primary text-on-primary">
+          <Plus className="h-4 w-4 mr-1" /> Novo Segmento
+        </Button>
+      </div>
+
+      {(editingSegment || isNew) && (
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">
+          <h3 className="text-lg font-bold text-cjp-primary mb-4">
+            {isNew ? "Novo Segmento" : `Editando: ${editingSegment?.title}`}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="flex flex-col gap-2">
+              <Label>Título</Label>
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Subtítulo</Label>
+              <Input value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 mb-4">
+            <Label>Descrição</Label>
+            <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={5} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="flex flex-col gap-2">
+              <Label>Ícone</Label>
+              <div className="flex flex-wrap gap-2">
+                {iconNames.map((name) => (
+                  <button
+                    key={name}
+                    onClick={() => setForm({ ...form, icon: name })}
+                    className={`p-2 rounded-lg border flex items-center justify-center transition-colors ${
+                      form.icon === name ? "border-cjp-primary bg-primary-fixed text-cjp-primary" : "border-outline-variant hover:border-cjp-primary"
+                    }`}
+                  >
+                    {iconMap[name]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Ordem</Label>
+              <Input type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: parseInt(e.target.value) || 0 })} />
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 mb-4">
+            <Label>Aplicações</Label>
+            {form.applications.map((app, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Input value={app} onChange={(e) => { const apps = [...form.applications]; apps[i] = e.target.value; setForm({ ...form, applications: apps }); }} />
+                <Button variant="ghost" size="sm" onClick={() => setForm({ ...form, applications: form.applications.filter((_, idx) => idx !== i) })}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
+            <div className="flex items-center gap-2">
+              <Input value={newApp} onChange={(e) => setNewApp(e.target.value)} placeholder="Nova aplicação..."
+                onKeyDown={(e) => { if (e.key === "Enter" && newApp) { setForm({ ...form, applications: [...form.applications, newApp] }); setNewApp(""); } }} />
+              <Button variant="outline" size="sm" onClick={() => { if (newApp) { setForm({ ...form, applications: [...form.applications, newApp] }); setNewApp(""); } }}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={handleSave} className="bg-cjp-primary text-on-primary"><Save className="h-4 w-4 mr-1" /> Salvar</Button>
+            <Button variant="outline" onClick={() => { setEditingSegment(null); setIsNew(false); }}>Cancelar</Button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3">
+        {segments.map((segment) => (
+          <div key={segment.id} className="flex items-center justify-between p-4 bg-surface-container-lowest border border-outline-variant rounded-lg">
+            <div className="flex items-center gap-3 flex-1 min-w-0 mr-4">
+              <div className="w-8 h-8 flex items-center justify-center rounded bg-primary-fixed text-cjp-primary shrink-0">
+                {iconMap[segment.icon] || <Globe className="h-4 w-4" />}
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-on-surface truncate">{segment.title}</div>
+                <div className="text-xs text-on-surface-variant truncate">{segment.subtitle}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <Button variant="ghost" size="sm" onClick={() => startEdit(segment)}><Edit3 className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={() => onDelete(segment.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// ==================== CASES TAB ====================
+function CasesTab({ cases, onUpdate, onDelete }: { cases: CaseStudy[]; onUpdate: (data: Partial<CaseStudy> & { id?: string }) => void; onDelete: (id: string) => void }) {
+  const [editingCase, setEditingCase] = useState<CaseStudy | null>(null);
+  const [isNew, setIsNew] = useState(false);
+  const [form, setForm] = useState({
+    title: "", segment: "", description: "", sortOrder: 0, highlights: [] as string[],
+  });
+  const [newHighlight, setNewHighlight] = useState("");
+
+  const startEdit = (caseStudy: CaseStudy) => {
+    setEditingCase(caseStudy);
+    setIsNew(false);
+    setForm({
+      title: caseStudy.title,
+      segment: caseStudy.segment,
+      description: caseStudy.description,
+      sortOrder: caseStudy.sortOrder,
+      highlights: parseHighlights(caseStudy.highlights),
+    });
+  };
+
+  const startNew = () => {
+    setEditingCase(null);
+    setIsNew(true);
+    setForm({ title: "", segment: "", description: "", sortOrder: 0, highlights: [] });
+  };
+
+  const handleSave = () => {
+    onUpdate({
+      ...(editingCase?.id && { id: editingCase.id }),
+      ...form,
+    });
+    setEditingCase(null);
+    setIsNew(false);
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-cjp-primary" style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}>
+          Gerenciar Cases
+        </h2>
+        <Button onClick={startNew} className="bg-cjp-primary text-on-primary">
+          <Plus className="h-4 w-4 mr-1" /> Novo Case
+        </Button>
+      </div>
+
+      {(editingCase || isNew) && (
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">
+          <h3 className="text-lg font-bold text-cjp-primary mb-4">
+            {isNew ? "Novo Case" : `Editando: ${editingCase?.title}`}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="flex flex-col gap-2">
+              <Label>Título</Label>
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Segmento</Label>
+              <Input value={form.segment} onChange={(e) => setForm({ ...form, segment: e.target.value })} />
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 mb-4">
+            <Label>Descrição (use parágrafos duplos para separar)</Label>
+            <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={6} />
+          </div>
+          <div className="flex flex-col gap-2 mb-4">
+            <Label>Destaques</Label>
+            {form.highlights.map((hl, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Input value={hl} onChange={(e) => { const hls = [...form.highlights]; hls[i] = e.target.value; setForm({ ...form, highlights: hls }); }} />
+                <Button variant="ghost" size="sm" onClick={() => setForm({ ...form, highlights: form.highlights.filter((_, idx) => idx !== i) })}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
+            <div className="flex items-center gap-2">
+              <Input value={newHighlight} onChange={(e) => setNewHighlight(e.target.value)} placeholder="Novo destaque..."
+                onKeyDown={(e) => { if (e.key === "Enter" && newHighlight) { setForm({ ...form, highlights: [...form.highlights, newHighlight] }); setNewHighlight(""); } }} />
+              <Button variant="outline" size="sm" onClick={() => { if (newHighlight) { setForm({ ...form, highlights: [...form.highlights, newHighlight] }); setNewHighlight(""); } }}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={handleSave} className="bg-cjp-primary text-on-primary"><Save className="h-4 w-4 mr-1" /> Salvar</Button>
+            <Button variant="outline" onClick={() => { setEditingCase(null); setIsNew(false); }}>Cancelar</Button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3">
+        {cases.map((caseStudy) => (
+          <div key={caseStudy.id} className="flex items-center justify-between p-4 bg-surface-container-lowest border border-outline-variant rounded-lg">
+            <div className="min-w-0 mr-4">
+              <div className="text-sm font-medium text-on-surface truncate">{caseStudy.title}</div>
+              <div className="text-xs text-on-surface-variant">{caseStudy.segment}</div>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <Button variant="ghost" size="sm" onClick={() => startEdit(caseStudy)}><Edit3 className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={() => onDelete(caseStudy.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
             </div>
           </div>
         ))}
@@ -658,7 +930,6 @@ function FooterTab({ footerLinks, onUpdate, onDelete, contents, onContentUpdate 
         Footer
       </h2>
 
-      {/* Copyright */}
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">
         <h3 className="text-lg font-bold text-cjp-primary mb-4">Copyright</h3>
         <div className="flex gap-2">
@@ -667,7 +938,6 @@ function FooterTab({ footerLinks, onUpdate, onDelete, contents, onContentUpdate 
         </div>
       </div>
 
-      {/* Links */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-on-surface-variant">Links do Footer</h3>
         <Button onClick={startNew} size="sm" className="bg-cjp-primary text-on-primary"><Plus className="h-4 w-4 mr-1" /> Novo Link</Button>
@@ -715,15 +985,13 @@ const emptySubscribe = () => () => {};
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  // useSyncExternalStore to detect client-side mounting
+
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
     () => false
   );
 
-  // Check auth after mount
   const [authChecked, setAuthChecked] = useState(false);
   if (mounted && !authChecked) {
     setAuthChecked(true);
