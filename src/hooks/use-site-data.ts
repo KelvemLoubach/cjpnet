@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { SiteContent, Service, Segment, CaseStudy, NavLink, FooterLink } from "@/lib/types";
 
 interface SiteData {
@@ -13,6 +13,17 @@ interface SiteData {
   loading: boolean;
 }
 
+async function safeFetchJson<T>(url: string, fallback: T): Promise<T> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return fallback;
+    const data = await res.json();
+    return Array.isArray(data) ? data : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export function useSiteData(): SiteData & { refetch: () => void } {
   const [contents, setContents] = useState<SiteContent[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -21,34 +32,47 @@ export function useSiteData(): SiteData & { refetch: () => void } {
   const [navLinks, setNavLinks] = useState<NavLink[]>([]);
   const [footerLinks, setFooterLinks] = useState<FooterLink[]>([]);
   const [loading, setLoading] = useState(true);
+  const hasSeeded = useRef(false);
 
   const fetchData = useCallback(async () => {
     try {
-      const [contentRes, servicesRes, segmentsRes, casesRes, navRes, footerRes] = await Promise.all([
-        fetch("/api/content"),
-        fetch("/api/services"),
-        fetch("/api/segments"),
-        fetch("/api/cases"),
-        fetch("/api/navigation"),
-        fetch("/api/footer"),
+      const [contentData, servicesData, segmentsData, casesData, navData, footerData] = await Promise.all([
+        safeFetchJson<SiteContent[]>("/api/content", []),
+        safeFetchJson<Service[]>("/api/services", []),
+        safeFetchJson<Segment[]>("/api/segments", []),
+        safeFetchJson<CaseStudy[]>("/api/cases", []),
+        safeFetchJson<NavLink[]>("/api/navigation", []),
+        safeFetchJson<FooterLink[]>("/api/footer", []),
       ]);
 
-      if (!contentRes.ok) {
-        const seedRes = await fetch("/api/seed", { method: "POST" });
-        if (seedRes.ok) {
-          await new Promise((r) => setTimeout(r, 500));
-          return fetchData();
+      // If content is empty, try to seed the database (only once)
+      if (contentData.length === 0 && !hasSeeded.current) {
+        hasSeeded.current = true;
+        try {
+          const seedRes = await fetch("/api/seed", { method: "POST" });
+          if (seedRes.ok) {
+            // Wait a moment and refetch
+            await new Promise((r) => setTimeout(r, 800));
+            const [c, s, seg, cas, nav, foot] = await Promise.all([
+              safeFetchJson<SiteContent[]>("/api/content", []),
+              safeFetchJson<Service[]>("/api/services", []),
+              safeFetchJson<Segment[]>("/api/segments", []),
+              safeFetchJson<CaseStudy[]>("/api/cases", []),
+              safeFetchJson<NavLink[]>("/api/navigation", []),
+              safeFetchJson<FooterLink[]>("/api/footer", []),
+            ]);
+            setContents(c);
+            setServices(s);
+            setSegments(seg);
+            setCases(cas);
+            setNavLinks(nav);
+            setFooterLinks(foot);
+            return;
+          }
+        } catch {
+          // Seed failed, use empty arrays
         }
       }
-
-      const [contentData, servicesData, segmentsData, casesData, navData, footerData] = await Promise.all([
-        contentRes.json(),
-        servicesRes.json(),
-        segmentsRes.json(),
-        casesRes.json(),
-        navRes.json(),
-        footerRes.json(),
-      ]);
 
       setContents(contentData);
       setServices(servicesData);

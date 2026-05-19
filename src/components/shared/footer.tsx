@@ -41,7 +41,7 @@ export default function Footer({ footerLinks, contents }: FooterProps) {
               <img
                 src="/logo.png"
                 alt="CJP NET"
-                className="h-9 w-auto brightness-0 invert transition-transform duration-300 group-hover:scale-105"
+                className="h-9 w-auto transition-transform duration-300 group-hover:scale-105"
               />
               <span
                 className="text-xl font-bold text-white tracking-tight"

@@ -3,7 +3,7 @@
 import { useState, useSyncExternalStore, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LogOut, Save, Plus, Trash2, Edit3,
+  LogOut, Save, Plus, Trash2, Edit3, ImageIcon, ExternalLink, X,
   Cloud, GitMerge, ShieldCheck, Blocks, Zap, Globe, Database, Lock, Cpu, BarChart3,
   LayoutDashboard, FileText, Settings, ArrowLeft, Target, Briefcase,
 } from "lucide-react";
@@ -30,7 +30,7 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 const iconNames = Object.keys(iconMap);
 
-type AdminTab = "conteudo" | "servicos" | "segmentos" | "cases" | "navegacao" | "footer";
+type AdminTab = "conteudo" | "imagens" | "servicos" | "segmentos" | "cases" | "navegacao" | "footer";
 
 // ==================== LOGIN SCREEN ====================
 function LoginScreen({ onLogin }: { onLogin: () => void }) {
@@ -177,13 +177,18 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
   // Content handlers
   const updateContent = async (key: string, value: string) => {
+    const isImage = key.startsWith("img_");
     await fetch("/api/content", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key, value }),
+      body: JSON.stringify({
+        key,
+        value,
+        ...(isImage ? { type: "image", group: "imagens" } : {}),
+      }),
     });
     fetchDataCb();
-    toast({ title: "Conteúdo atualizado!", description: `"${key}" salvo com sucesso.` });
+    toast({ title: isImage ? "Imagem atualizada!" : "Conteúdo atualizado!", description: `"${key}" salvo com sucesso.` });
   };
 
   // Service handlers
@@ -283,6 +288,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
   const tabs: { key: AdminTab; label: string; icon: React.ReactNode }[] = [
     { key: "conteudo", label: "Conteúdo", icon: <FileText className="h-4 w-4" /> },
+    { key: "imagens", label: "Imagens", icon: <ImageIcon className="h-4 w-4" /> },
     { key: "servicos", label: "Soluções", icon: <Blocks className="h-4 w-4" /> },
     { key: "segmentos", label: "Segmentos", icon: <Target className="h-4 w-4" /> },
     { key: "cases", label: "Cases", icon: <Briefcase className="h-4 w-4" /> },
@@ -338,6 +344,9 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             {activeTab === "conteudo" && (
               <ContentTab key="conteudo" contents={contents} onUpdate={updateContent} />
             )}
+            {activeTab === "imagens" && (
+              <ImagesTab key="imagens" contents={contents} onUpdate={updateContent} />
+            )}
             {activeTab === "servicos" && (
               <ServicesTab key="servicos" services={services} onUpdate={updateService} onDelete={deleteService} />
             )}
@@ -357,6 +366,292 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         </div>
       </main>
     </div>
+  );
+}
+
+// ==================== IMAGES TAB ====================
+const predefinedImageSlots = [
+  { key: "img_logo", label: "Logo do Site", description: "Logo principal exibido na navbar e footer" },
+  { key: "img_favicon", label: "Favicon", description: "Ícone exibido na aba do navegador" },
+  { key: "img_og_image", label: "OG Image (Compartilhamento)", description: "Imagem exibida ao compartilhar o site em redes sociais" },
+  { key: "img_hero_bg", label: "Hero Background", description: "Imagem de fundo da seção hero (opcional)" },
+  { key: "img_gallery_1", label: "Galeria - Imagem 1", description: "Dashboards Estratégicos" },
+  { key: "img_gallery_2", label: "Galeria - Imagem 2", description: "Integração de Dados" },
+  { key: "img_gallery_3", label: "Galeria - Imagem 3", description: "Infraestrutura Própria" },
+  { key: "img_gallery_4", label: "Galeria - Imagem 4", description: "Equipe Especializada" },
+  { key: "img_gallery_5", label: "Galeria - Imagem 5", description: "Plataformas SaaS" },
+  { key: "img_gallery_6", label: "Galeria - Imagem 6", description: "Segurança e Confiabilidade" },
+  { key: "img_about_joao", label: "Sobre - Foto do Fundador", description: "Foto de João Pessolato para a página Sobre" },
+  { key: "img_about_team", label: "Sobre - Foto da Equipe", description: "Foto da equipe para a página Sobre" },
+];
+
+function ImagesTab({ contents, onUpdate }: { contents: SiteContent[]; onUpdate: (key: string, value: string) => void }) {
+  const [editValues, setEditValues] = useState<Record<string, string>>({});
+  const [newImageKey, setNewImageKey] = useState("");
+  const [newImageUrl, setNewImageUrl] = useState("");
+  const [previewErrors, setPreviewErrors] = useState<Record<string, boolean>>({});
+
+  const getImageValue = (key: string): string => {
+    return contents.find((c) => c.key === key)?.value || "";
+  };
+
+  const getEditValue = (key: string): string => {
+    return editValues[key] ?? getImageValue(key);
+  };
+
+  const handleSave = (key: string) => {
+    const value = getEditValue(key);
+    onUpdate(key, value);
+    setEditValues((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const handleClear = (key: string) => {
+    onUpdate(key, "");
+    setEditValues((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const handleAddNew = () => {
+    if (!newImageKey.trim() || !newImageUrl.trim()) return;
+    const key = newImageKey.startsWith("img_") ? newImageKey : `img_${newImageKey}`;
+    onUpdate(key, newImageUrl);
+    setNewImageKey("");
+    setNewImageUrl("");
+  };
+
+  // Find custom image entries (not in predefined list)
+  const predefinedKeys = new Set(predefinedImageSlots.map((s) => s.key));
+  const customImages = contents.filter(
+    (c) => (c.type === "image" || c.key.startsWith("img_")) && !predefinedKeys.has(c.key)
+  );
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-cjp-primary" style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}>
+            Gerenciar Imagens
+          </h2>
+          <p className="text-sm text-on-surface-variant mt-1">
+            Cole as URLs públicas das imagens para cada posição do site
+          </p>
+        </div>
+      </div>
+
+      {/* Info card */}
+      <div className="bg-cjp-accent/[0.06] border border-cjp-accent/15 rounded-xl p-4 mb-8 flex items-start gap-3">
+        <ImageIcon className="h-5 w-5 text-cjp-accent shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-medium text-cjp-primary mb-1">Como funciona</p>
+          <p className="text-xs text-on-surface-variant leading-relaxed">
+            Cole a URL pública de uma imagem (ex: <code className="bg-black/5 px-1 rounded text-[11px]">https://exemplo.com/imagem.png</code>) em cada campo.
+            As imagens serão exibidas automaticamente no site. Use serviços como Imgur, Cloudinary, ou qualquer CDN de imagens.
+          </p>
+        </div>
+      </div>
+
+      {/* Predefined image slots */}
+      <div className="flex flex-col gap-4 mb-10">
+        {predefinedImageSlots.map((slot) => {
+          const currentValue = getEditValue(slot.key);
+          const savedValue = getImageValue(slot.key);
+          const hasChanges = editValues[slot.key] !== undefined && editValues[slot.key] !== savedValue;
+
+          return (
+            <div
+              key={slot.key}
+              className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 hover:border-cjp-primary/20 transition-colors"
+            >
+              <div className="flex items-start gap-5">
+                {/* Preview */}
+                <div className="w-24 h-24 rounded-lg bg-surface-container border border-outline-variant/50 flex items-center justify-center overflow-hidden shrink-0">
+                  {currentValue && !previewErrors[slot.key] ? (
+                    <img
+                      src={currentValue}
+                      alt={slot.label}
+                      className="w-full h-full object-cover"
+                      onError={() => setPreviewErrors((prev) => ({ ...prev, [slot.key]: true }))}
+                      onLoad={() => setPreviewErrors((prev) => ({ ...prev, [slot.key]: false }))}
+                    />
+                  ) : (
+                    <ImageIcon className="h-8 w-8 text-outline-variant" />
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="text-sm font-semibold text-cjp-primary">{slot.label}</h4>
+                    <span className="text-[10px] font-mono text-on-surface-variant/50 bg-surface-container px-1.5 py-0.5 rounded">
+                      {slot.key}
+                    </span>
+                  </div>
+                  <p className="text-xs text-on-surface-variant mb-3">{slot.description}</p>
+
+                  <div className="flex gap-2">
+                    <Input
+                      value={currentValue}
+                      onChange={(e) =>
+                        setEditValues((prev) => ({ ...prev, [slot.key]: e.target.value }))
+                      }
+                      placeholder="Cole a URL pública da imagem aqui..."
+                      className="text-sm h-9"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => handleSave(slot.key)}
+                      disabled={!hasChanges && !!savedValue}
+                      className="bg-cjp-primary text-on-primary h-9 px-3 shrink-0"
+                    >
+                      <Save className="h-3.5 w-3.5 mr-1" />
+                      Salvar
+                    </Button>
+                    {savedValue && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleClear(slot.key)}
+                        className="h-9 px-3 shrink-0 text-destructive hover:bg-destructive/10"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
+
+                  {savedValue && (
+                    <a
+                      href={savedValue}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-cjp-accent hover:text-cjp-accent-light inline-flex items-center gap-1 mt-2 transition-colors"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Abrir imagem em nova aba
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Custom images section */}
+      {customImages.length > 0 && (
+        <div className="mb-10">
+          <h3 className="text-lg font-bold text-on-surface-variant mb-4 uppercase tracking-wider text-sm">
+            Imagens Personalizadas
+          </h3>
+          <div className="flex flex-col gap-3">
+            {customImages.map((item) => {
+              const currentValue = getEditValue(item.key);
+              const hasChanges = editValues[item.key] !== undefined && editValues[item.key] !== item.value;
+
+              return (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-4 p-4 bg-surface-container-lowest border border-outline-variant rounded-lg hover:border-cjp-primary/20 transition-colors"
+                >
+                  {/* Mini preview */}
+                  <div className="w-14 h-14 rounded-lg bg-surface-container border border-outline-variant/50 flex items-center justify-center overflow-hidden shrink-0">
+                    {currentValue && !previewErrors[item.key] ? (
+                      <img
+                        src={currentValue}
+                        alt={item.key}
+                        className="w-full h-full object-cover"
+                        onError={() => setPreviewErrors((prev) => ({ ...prev, [item.key]: true }))}
+                      />
+                    ) : (
+                      <ImageIcon className="h-5 w-5 text-outline-variant" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-on-surface-variant font-mono mb-1">{item.key}</div>
+                    <Input
+                      value={currentValue}
+                      onChange={(e) =>
+                        setEditValues((prev) => ({ ...prev, [item.key]: e.target.value }))
+                      }
+                      placeholder="URL da imagem..."
+                      className="text-sm h-8"
+                    />
+                  </div>
+
+                  <div className="flex gap-1.5 shrink-0">
+                    <Button size="sm" onClick={() => handleSave(item.key)} disabled={!hasChanges} className="bg-cjp-primary text-on-primary h-8">
+                      <Save className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => handleClear(item.key)} className="h-8 text-destructive hover:bg-destructive/10">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Add new image */}
+      <Separator className="my-6" />
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+        <h3 className="text-sm font-bold text-cjp-primary mb-4 flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Adicionar Nova Imagem
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-3">
+          <div>
+            <Label className="text-xs mb-1">Chave (identificador)</Label>
+            <Input
+              value={newImageKey}
+              onChange={(e) => setNewImageKey(e.target.value)}
+              placeholder="ex: banner_promocional"
+              className="text-sm h-9"
+            />
+          </div>
+          <div>
+            <Label className="text-xs mb-1">URL da Imagem</Label>
+            <div className="flex gap-2">
+              <Input
+                value={newImageUrl}
+                onChange={(e) => setNewImageUrl(e.target.value)}
+                placeholder="https://exemplo.com/imagem.png"
+                className="text-sm h-9"
+              />
+              <Button
+                onClick={handleAddNew}
+                disabled={!newImageKey.trim() || !newImageUrl.trim()}
+                className="bg-cjp-primary text-on-primary h-9 px-4 shrink-0"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Adicionar
+              </Button>
+            </div>
+          </div>
+        </div>
+        {newImageUrl && (
+          <div className="mt-4 flex items-center gap-3">
+            <div className="w-16 h-16 rounded-lg bg-surface-container border border-outline-variant/50 overflow-hidden">
+              <img
+                src={newImageUrl}
+                alt="Preview"
+                className="w-full h-full object-cover"
+                onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+              />
+            </div>
+            <span className="text-xs text-on-surface-variant">Preview da nova imagem</span>
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 }
 

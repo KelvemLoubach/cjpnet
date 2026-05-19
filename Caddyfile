@@ -11,7 +11,7 @@
 			header_up X-Real-IP {remote_host}
 		}
 	}
-
+	
 	handle {
 		reverse_proxy localhost:3000 {
 			header_up Host {host}
