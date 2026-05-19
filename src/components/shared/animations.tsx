@@ -103,7 +103,7 @@ export function StaggerContainer({
       whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}
       variants={{
-        visible: { transition: { staggerChildren: 0.12 } },
+        visible: { transition: { staggerChildren: 0.1 } },
         hidden: {},
       }}
       className={className}
@@ -123,7 +123,7 @@ export function StaggerItem({
   return (
     <motion.div
       variants={{
-        hidden: { opacity: 0, y: 30 },
+        hidden: { opacity: 0, y: 25 },
         visible: {
           opacity: 1,
           y: 0,
@@ -139,10 +139,13 @@ export function StaggerItem({
 
 export function SectionTag({ text }: { text: string }) {
   return (
-    <div className="inline-flex items-center gap-2 border border-[#0a1628]/10 px-3.5 py-1.5 rounded-full bg-white mb-6 shadow-sm">
-      <span className="w-2 h-2 rounded-full bg-[#5845cc] pulse-dot" />
+    <div className="inline-flex items-center gap-2.5 border border-[#0a1628]/8 px-4 py-2 rounded-full bg-white shadow-sm mb-6">
+      <span className="relative flex h-2 w-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cjp-accent opacity-50" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-cjp-accent" />
+      </span>
       <span
-        className="text-xs text-[#5c5f6e] tracking-widest uppercase font-medium"
+        className="text-[11px] text-[#5c5f6e] tracking-[0.15em] uppercase font-semibold"
         style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
       >
         {text}
@@ -153,10 +156,13 @@ export function SectionTag({ text }: { text: string }) {
 
 export function SectionTagDark({ text }: { text: string }) {
   return (
-    <div className="inline-flex items-center gap-2 border border-white/20 px-3.5 py-1.5 rounded-full bg-white/10 mb-6">
-      <span className="w-2 h-2 rounded-full bg-[#5845cc] pulse-dot" />
+    <div className="inline-flex items-center gap-2.5 border border-white/10 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm mb-6">
+      <span className="relative flex h-2 w-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cjp-accent opacity-50" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-cjp-accent-light" />
+      </span>
       <span
-        className="text-xs text-white/80 tracking-widest uppercase font-medium"
+        className="text-[11px] text-white/70 tracking-[0.15em] uppercase font-semibold"
         style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
       >
         {text}
@@ -175,16 +181,19 @@ export function PageHero({
   description?: string;
 }) {
   return (
-    <section className="pt-28 pb-12 md:pt-36 md:pb-16 relative overflow-hidden">
+    <section className="pt-28 pb-14 md:pt-36 md:pb-20 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-white via-[#f5f6f8] to-[#5845cc]/5 gradient-animate" />
-      <div className="absolute inset-0 dot-pattern opacity-40" />
+      <div className="absolute inset-0 dot-pattern opacity-30" />
+      {/* Accent line */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-cjp-accent/20 to-transparent" />
+
       <div className="max-w-[1280px] mx-auto px-4 md:px-10 relative z-10">
         <AnimatedSection>
           <SectionTag text={tag} />
         </AnimatedSection>
         <AnimatedSection delay={0.1}>
           <h1
-            className="text-4xl md:text-5xl lg:text-[48px] font-bold text-[#0a1628] leading-[1.1] tracking-tight mb-4"
+            className="text-4xl md:text-5xl lg:text-[52px] font-bold text-[#0a1628] leading-[1.08] tracking-[-0.02em] mb-4"
             style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
           >
             {title}

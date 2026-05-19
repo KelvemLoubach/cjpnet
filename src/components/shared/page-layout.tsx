@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Navigation from "@/components/shared/navigation";
 import Footer from "@/components/shared/footer";
+import WhatsAppButton from "@/components/shared/whatsapp-button";
 import { useSiteData } from "@/hooks/use-site-data";
 
 export default function PageLayout({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,7 @@ export default function PageLayout({ children }: { children: React.ReactNode }) 
       <Navigation navLinks={navLinks} contents={contents} />
       <main className="flex-grow pt-[72px]">{children}</main>
       <Footer footerLinks={footerLinks} contents={contents} />
+      <WhatsAppButton />
     </div>
   );
 }

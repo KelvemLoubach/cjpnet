@@ -1,15 +1,18 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef, useEffect, useState } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import {
   Cloud, GitMerge, ShieldCheck, Blocks, ArrowRight,
   MessageCircle, BarChart3, Users, Zap, Shield,
   Database, Server, Settings, Headphones, Search,
-  Cpu, Lock, Globe, Check,
+  Cpu, Lock, Globe, Check, ChevronRight, Play,
+  TrendingUp, Activity, Layers, Code2, ArrowDownRight,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PageLayout from "@/components/shared/page-layout";
+import ImageGallery from "@/components/shared/image-gallery";
 import {
   AnimatedSection,
   StaggerContainer,
@@ -39,6 +42,34 @@ const iconMap: Record<string, React.ReactNode> = {
   search: <Search className="h-6 w-6" />,
 };
 
+/* ─── Animated Counter ─── */
+function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (!isInView) return;
+    let start = 0;
+    const end = value;
+    const duration = 2000;
+    const stepTime = Math.abs(Math.floor(duration / end));
+    const timer = setInterval(() => {
+      start += 1;
+      setCount(start);
+      if (start >= end) clearInterval(timer);
+    }, stepTime);
+    return () => clearInterval(timer);
+  }, [isInView, value]);
+
+  return (
+    <span ref={ref}>
+      {count}
+      {suffix}
+    </span>
+  );
+}
+
 /* ─── Floating Dashboard Card ─── */
 function DashboardCard({
   label,
@@ -58,18 +89,18 @@ function DashboardCard({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className={`bg-white/[0.07] backdrop-blur-md rounded-xl p-4 border border-white/[0.12] shadow-lg ${className}`}
+      className={`bg-white/[0.06] backdrop-blur-xl rounded-2xl p-5 border border-white/[0.08] shadow-2xl shadow-black/10 group hover:bg-white/[0.1] hover:border-white/[0.15] transition-all duration-500 ${className}`}
     >
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-lg bg-cjp-accent/20 flex items-center justify-center text-cjp-accent-light">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-9 h-9 rounded-xl bg-cjp-accent/20 flex items-center justify-center text-cjp-accent-light group-hover:scale-110 transition-transform duration-300">
           {icon}
         </div>
-        <span className="text-white/50 text-xs font-medium uppercase tracking-wider">
+        <span className="text-white/40 text-[11px] font-semibold uppercase tracking-widest">
           {label}
         </span>
       </div>
       <div
-        className="text-white text-xl font-bold"
+        className="text-white text-2xl font-bold tracking-tight"
         style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
       >
         {value}
@@ -78,7 +109,7 @@ function DashboardCard({
   );
 }
 
-/* ─── 1. Hero Section ─── */
+/* ─── 1. Hero Section (Redesigned) ─── */
 function HeroSection({
   contents,
 }: {
@@ -89,9 +120,10 @@ function HeroSection({
     target: ref,
     offset: ["start start", "end start"],
   });
-  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
-  const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const cardsY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  const cardsY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
 
   const heroTag =
     getContentValue(contents, "hero_tag") ||
@@ -105,52 +137,56 @@ function HeroSection({
 
   return (
     <section ref={ref} className="relative overflow-hidden -mt-20">
-      {/* Dark blue gradient background */}
+      {/* Multi-layer gradient background */}
       <motion.div
         style={{ y: bgY }}
-        className="absolute inset-0 bg-gradient-to-br from-[#0a1628] via-[#0f1f3a] to-[#162744]"
+        className="absolute inset-0 bg-gradient-to-br from-[#070d1a] via-[#0c1a33] to-[#111f3c]"
       />
 
-      {/* Subtle mesh overlays */}
+      {/* Mesh gradient overlays */}
       <div className="absolute inset-0 pointer-events-none">
         <div
           className="absolute inset-0"
           style={{
             backgroundImage:
-              "radial-gradient(ellipse at 20% 50%, rgba(88, 69, 204, 0.12) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(22, 39, 68, 0.2) 0%, transparent 50%), radial-gradient(ellipse at 60% 80%, rgba(88, 69, 204, 0.06) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 15% 50%, rgba(88, 69, 204, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 85% 20%, rgba(22, 39, 68, 0.25) 0%, transparent 50%), radial-gradient(ellipse at 50% 90%, rgba(88, 69, 204, 0.08) 0%, transparent 40%)",
           }}
         />
       </div>
 
-      {/* Tech grid pattern */}
+      {/* Animated grid */}
       <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
+            "linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)",
+          backgroundSize: "80px 80px",
         }}
       />
 
-      {/* Floating animated dots */}
+      {/* Floating orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(8)].map((_, i) => (
+        {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-cjp-accent-light/40 rounded-full"
+            className="absolute rounded-full"
             style={{
-              left: `${10 + i * 12}%`,
-              top: `${15 + (i % 4) * 20}%`,
+              left: `${8 + i * 17}%`,
+              top: `${10 + (i % 3) * 30}%`,
+              width: `${4 + i * 2}px`,
+              height: `${4 + i * 2}px`,
+              background: i % 2 === 0 ? "rgba(88, 69, 204, 0.5)" : "rgba(123, 106, 255, 0.3)",
             }}
             animate={{
-              y: [-15, 15, -15],
-              opacity: [0.2, 0.6, 0.2],
+              y: [-20, 20, -20],
+              opacity: [0.3, 0.8, 0.3],
+              scale: [1, 1.2, 1],
             }}
             transition={{
-              duration: 5 + i * 0.5,
+              duration: 6 + i * 0.7,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: i * 0.4,
+              delay: i * 0.6,
             }}
           />
         ))}
@@ -159,132 +195,161 @@ function HeroSection({
       {/* Data flow lines */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-[30%] left-0 right-0 h-px data-flow-line"
-          animate={{ opacity: [0.3, 0.7, 0.3] }}
+          className="absolute top-[35%] left-0 right-0 h-px data-flow-line"
+          animate={{ opacity: [0.2, 0.6, 0.2] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute top-[70%] left-0 right-0 h-px data-flow-line"
-          animate={{ opacity: [0.2, 0.5, 0.2] }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
+          className="absolute top-[65%] left-0 right-0 h-px data-flow-line"
+          animate={{ opacity: [0.15, 0.4, 0.15] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
         />
       </div>
 
       {/* Content */}
-      <div className="max-w-[1280px] mx-auto px-4 md:px-10 pt-32 md:pt-40 pb-20 md:pb-32 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
-        {/* Text column */}
-        <motion.div
-          style={{ opacity: textOpacity }}
-          className="lg:col-span-7 flex flex-col gap-6"
-        >
-          <AnimatedSection>
-            <SectionTagDark text={heroTag} />
-          </AnimatedSection>
-
-          <AnimatedSection delay={0.1}>
-            <h1
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-[46px] font-bold text-white leading-[1.1] tracking-tight"
-              style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-            >
-              {heroTitle}
-            </h1>
-          </AnimatedSection>
-
-          <AnimatedSection delay={0.2}>
-            <p className="text-base md:text-lg text-white/70 leading-relaxed max-w-xl">
-              {heroDesc}
-            </p>
-          </AnimatedSection>
-
-          <AnimatedSection delay={0.3}>
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <a
-                href="https://wa.me/5511914922773"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button className="bg-cjp-accent hover:bg-cjp-accent-light text-white h-12 px-8 font-medium text-sm rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-cjp-accent/25">
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Falar com um Especialista
-                </Button>
-              </a>
-              <a href="/cases">
-                <Button
-                  variant="outline"
-                  className="border-white/20 text-white hover:bg-white/10 hover:text-white h-12 px-8 font-medium text-sm rounded-lg transition-all duration-300"
+      <motion.div style={{ scale }} className="relative z-10">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-10 pt-32 md:pt-44 pb-24 md:pb-40 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+          {/* Text column */}
+          <motion.div
+            style={{ opacity: textOpacity }}
+            className="lg:col-span-7 flex flex-col gap-7"
+          >
+            <AnimatedSection>
+              <div className="inline-flex items-center gap-2.5 border border-white/10 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cjp-accent opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cjp-accent-light" />
+                </span>
+                <span
+                  className="text-[11px] text-white/70 tracking-[0.15em] uppercase font-semibold"
+                  style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                 >
-                  Ver Casos de Aplicação
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </a>
-            </div>
-          </AnimatedSection>
-        </motion.div>
-
-        {/* Dashboard cards column */}
-        <AnimatedSection
-          delay={0.3}
-          className="lg:col-span-5 hidden lg:block"
-        >
-          <motion.div style={{ y: cardsY }} className="relative">
-            <div className="relative">
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <DashboardCard
-                  label="Uptime"
-                  value="99.9%"
-                  icon={<Shield className="h-3.5 w-3.5" />}
-                  delay={0.5}
-                />
-                <DashboardCard
-                  label="Operações"
-                  value="Processadas"
-                  icon={<BarChart3 className="h-3.5 w-3.5" />}
-                  delay={0.65}
-                />
+                  {heroTag}
+                </span>
               </div>
+            </AnimatedSection>
 
-              <DashboardCard
-                label="Usuários Ativos"
-                value="Centenas"
-                icon={<Users className="h-3.5 w-3.5" />}
-                className="mb-4"
-                delay={0.8}
-              />
+            <AnimatedSection delay={0.1}>
+              <h1
+                className="text-[32px] sm:text-[40px] md:text-[48px] lg:text-[54px] font-bold text-white leading-[1.08] tracking-[-0.02em]"
+                style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+              >
+                {heroTitle}
+              </h1>
+            </AnimatedSection>
 
-              <div className="grid grid-cols-2 gap-4">
-                <DashboardCard
-                  label="Integrações"
-                  value="ERP / BI"
-                  icon={<Database className="h-3.5 w-3.5" />}
-                  delay={0.95}
-                />
-                <DashboardCard
-                  label="Segurança"
-                  value="Ativa 24/7"
-                  icon={<Lock className="h-3.5 w-3.5" />}
-                  delay={1.1}
-                />
+            <AnimatedSection delay={0.2}>
+              <p className="text-base md:text-lg text-white/55 leading-relaxed max-w-xl">
+                {heroDesc}
+              </p>
+            </AnimatedSection>
+
+            <AnimatedSection delay={0.3}>
+              <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                <a
+                  href="https://wa.me/5511914922773"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button className="bg-cjp-accent hover:bg-cjp-accent-light text-white h-[52px] px-8 font-semibold text-sm rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-cjp-accent/30 group">
+                    <MessageCircle className="mr-2.5 h-[18px] w-[18px]" />
+                    Falar com um Especialista
+                    <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                  </Button>
+                </a>
+                <a href="/cases">
+                  <Button
+                    variant="outline"
+                    className="border-white/15 text-white hover:bg-white/10 hover:border-white/25 hover:text-white h-[52px] px-8 font-semibold text-sm rounded-xl transition-all duration-300 bg-white/5 backdrop-blur-sm group"
+                  >
+                    Ver Cases de Aplicação
+                    <ChevronRight className="ml-1.5 h-4 w-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300" />
+                  </Button>
+                </a>
               </div>
-
-              <div className="absolute -top-8 -right-8 w-32 h-32 bg-cjp-accent/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cjp-accent/5 rounded-full blur-2xl pointer-events-none" />
-            </div>
+            </AnimatedSection>
           </motion.div>
-        </AnimatedSection>
-      </div>
+
+          {/* Dashboard cards column */}
+          <AnimatedSection
+            delay={0.3}
+            className="lg:col-span-5 hidden lg:block"
+          >
+            <motion.div style={{ y: cardsY }} className="relative">
+              <div className="relative">
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <DashboardCard
+                    label="Uptime"
+                    value="99.9%"
+                    icon={<Shield className="h-4 w-4" />}
+                    delay={0.5}
+                  />
+                  <DashboardCard
+                    label="Operações"
+                    value="Ativas 24/7"
+                    icon={<Activity className="h-4 w-4" />}
+                    delay={0.65}
+                  />
+                </div>
+
+                <DashboardCard
+                  label="Usuários Corporativos"
+                  value="Centenas"
+                  icon={<Users className="h-4 w-4" />}
+                  className="mb-4"
+                  delay={0.8}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <DashboardCard
+                    label="Integrações"
+                    value="ERP / BI"
+                    icon={<Database className="h-4 w-4" />}
+                    delay={0.95}
+                  />
+                  <DashboardCard
+                    label="Segurança"
+                    value="Ativa 24/7"
+                    icon={<Lock className="h-4 w-4" />}
+                    delay={1.1}
+                  />
+                </div>
+
+                {/* Decorative glows */}
+                <div className="absolute -top-12 -right-12 w-40 h-40 bg-cjp-accent/8 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-cjp-accent/4 rounded-full blur-3xl pointer-events-none" />
+              </div>
+            </motion.div>
+          </AnimatedSection>
+        </div>
+      </motion.div>
 
       {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-surface to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-surface to-transparent" />
+
+      {/* Scroll indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2, duration: 1 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden lg:flex flex-col items-center gap-2"
+      >
+        <span className="text-white/30 text-[10px] uppercase tracking-[0.2em] font-medium">
+          Scroll
+        </span>
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="w-5 h-8 rounded-full border border-white/20 flex justify-center pt-1.5"
+        >
+          <div className="w-1 h-2 bg-white/40 rounded-full" />
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
 
-/* ─── 2. Quem Somos Section ─── */
+/* ─── 2. Quem Somos Section (Redesigned) ─── */
 function QuemSomosSection({
   contents,
 }: {
@@ -295,37 +360,69 @@ function QuemSomosSection({
     "A CJP NET atua no desenvolvimento e operação de soluções digitais corporativas voltadas à organização, integração e gestão de processos empresariais.";
 
   return (
-    <section className="py-20 md:py-28 bg-surface-container-lowest relative overflow-hidden">
+    <section className="py-24 md:py-32 bg-surface-container-lowest relative overflow-hidden">
       <div
         className="absolute inset-0 opacity-[0.02] pointer-events-none"
         style={{
           backgroundImage:
             "radial-gradient(#0a1628 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
+          backgroundSize: "28px 28px",
         }}
       />
 
+      {/* Accent line top */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-cjp-accent/30 to-transparent" />
+
       <div className="max-w-[1280px] mx-auto px-4 md:px-10 relative z-10">
         <AnimatedSection className="text-center max-w-3xl mx-auto">
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-8 h-px bg-cjp-accent/40" />
-            <div className="w-2 h-2 rounded-full bg-cjp-accent/60" />
-            <div className="w-8 h-px bg-cjp-accent/40" />
-          </div>
-
           <SectionTag text="Quem Somos" />
+
+          <h2
+            className="text-3xl md:text-[40px] font-bold text-cjp-primary tracking-tight mb-8 leading-tight"
+            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+          >
+            Tecnologia que estrutura operações
+          </h2>
 
           <p
             className="text-lg md:text-xl text-on-surface-variant leading-relaxed"
-            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {summary}
           </p>
+        </AnimatedSection>
 
-          <div className="flex items-center justify-center gap-3 mt-8">
-            <div className="w-8 h-px bg-cjp-accent/40" />
-            <div className="w-2 h-2 rounded-full bg-cjp-accent/60" />
-            <div className="w-8 h-px bg-cjp-accent/40" />
+        {/* Stats row */}
+        <AnimatedSection delay={0.2}>
+          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            {[
+              { value: 16, suffix: "+", label: "Anos de Experiência", icon: <TrendingUp className="h-5 w-5" /> },
+              { value: 100, suffix: "%", label: "Desenvolvimento Próprio", icon: <Code2 className="h-5 w-5" /> },
+              { value: 99, suffix: ".9%", label: "Uptime Garantido", icon: <Shield className="h-5 w-5" /> },
+              { value: 24, suffix: "/7", label: "Operação Contínua", icon: <Activity className="h-5 w-5" /> },
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                className="text-center group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-cjp-accent/8 flex items-center justify-center text-cjp-accent mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  {stat.icon}
+                </div>
+                <div
+                  className="text-3xl md:text-4xl font-bold text-cjp-primary mb-1"
+                  style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                >
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                </div>
+                <p className="text-sm text-on-surface-variant font-medium">
+                  {stat.label}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </AnimatedSection>
       </div>
@@ -333,29 +430,47 @@ function QuemSomosSection({
   );
 }
 
-/* ─── 3. O Que Fazemos Section ─── */
+/* ─── 3. Services Section (Redesigned) ─── */
 function ServicesSection({ services }: { services: Service[] }) {
   return (
-    <section className="py-20 md:py-28 bg-surface-container-low relative overflow-hidden">
+    <section className="py-24 md:py-32 bg-surface-container-low relative overflow-hidden">
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
           backgroundImage:
             "radial-gradient(#001736 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
+          backgroundSize: "28px 28px",
         }}
       />
 
+      {/* Accent shapes */}
+      <div className="absolute top-20 right-0 w-72 h-72 bg-cjp-accent/3 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-20 left-0 w-56 h-56 bg-cjp-accent/2 rounded-full blur-3xl pointer-events-none" />
+
       <div className="max-w-[1280px] mx-auto px-4 md:px-10 relative z-10">
-        <AnimatedSection>
-          <SectionTag text="O Que Fazemos" />
-          <h2
-            className="text-3xl md:text-[32px] font-bold text-cjp-primary tracking-tight mb-12"
-            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-          >
-            Soluções para Cada Necessidade
-          </h2>
-        </AnimatedSection>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
+          <AnimatedSection>
+            <SectionTag text="O Que Fazemos" />
+            <h2
+              className="text-3xl md:text-[40px] font-bold text-cjp-primary tracking-tight leading-tight"
+              style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+            >
+              Soluções para Cada<br className="hidden md:block" /> Necessidade
+            </h2>
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.15}>
+            <a href="/solucoes">
+              <Button
+                variant="outline"
+                className="border-cjp-primary/20 text-cjp-primary hover:bg-cjp-primary hover:text-on-primary h-11 px-6 rounded-xl font-medium text-sm transition-all duration-300 group"
+              >
+                Ver Todas as Soluções
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+              </Button>
+            </a>
+          </AnimatedSection>
+        </div>
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {services.slice(0, 4).map((service) => {
@@ -364,90 +479,119 @@ function ServicesSection({ services }: { services: Service[] }) {
             return (
               <StaggerItem
                 key={service.id}
-                className={`p-8 flex flex-col gap-4 transition-all duration-500 rounded-xl group relative overflow-hidden ${
+                className={`relative group overflow-hidden rounded-2xl transition-all duration-500 ${
                   isHighlight
-                    ? "bg-cjp-primary text-on-primary border-2 border-cjp-accent"
-                    : "bg-surface-container-lowest border border-outline-variant hover:shadow-lg hover:border-outline"
+                    ? "bg-cjp-primary text-on-primary"
+                    : "bg-surface-container-lowest border border-outline-variant hover:border-outline hover:shadow-xl hover:shadow-cjp-primary/5"
                 }`}
               >
-                {/* Hover gradient overlay */}
-                <div
-                  className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none ${
-                    isHighlight
-                      ? "bg-gradient-to-r from-white/0 via-white/5 to-white/0"
-                      : "bg-gradient-to-r from-primary-fixed/0 via-primary-fixed/5 to-primary-fixed/0"
-                  }`}
-                />
+                {/* Card content */}
+                <div className="p-8 md:p-9 flex flex-col gap-5 relative z-10">
+                  {/* Icon */}
+                  <div
+                    className={`w-14 h-14 flex items-center justify-center rounded-xl border transition-transform duration-300 group-hover:scale-110 ${
+                      isHighlight
+                        ? "bg-cjp-accent/20 border-cjp-accent/25 text-cjp-accent-light"
+                        : "bg-primary-fixed border-primary-fixed-dim text-cjp-primary"
+                    }`}
+                  >
+                    {iconMap[service.icon] || (
+                      <Cloud className="h-6 w-6" />
+                    )}
+                  </div>
 
-                {/* Icon */}
-                <div
-                  className={`w-12 h-12 flex items-center justify-center rounded-lg border z-10 ${
-                    isHighlight
-                      ? "bg-cjp-accent/20 border-cjp-accent/30 text-cjp-accent-light"
-                      : "bg-primary-fixed border-primary-fixed-dim text-cjp-primary"
-                  }`}
-                >
-                  {iconMap[service.icon] || (
-                    <Cloud className="h-6 w-6" />
+                  {/* Content */}
+                  <div>
+                    <h3
+                      className={`text-xl font-bold mb-3 ${
+                        isHighlight
+                          ? "text-on-primary"
+                          : "text-cjp-primary"
+                      }`}
+                      style={{
+                        fontFamily: "'Hanken Grotesk', sans-serif",
+                      }}
+                    >
+                      {service.title}
+                    </h3>
+                    <p
+                      className={`text-base leading-relaxed ${
+                        isHighlight
+                          ? "text-white/65"
+                          : "text-on-surface-variant"
+                      }`}
+                    >
+                      {service.description}
+                    </p>
+                  </div>
+
+                  {/* Highlight badge */}
+                  {isHighlight && (
+                    <div className="mt-auto pt-5 border-t border-cjp-accent/20">
+                      <span className="inline-flex items-center gap-2 text-xs font-semibold text-cjp-accent-light uppercase tracking-wider">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        Solução Personalizada
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Hover arrow */}
+                  {!isHighlight && (
+                    <div className="mt-auto pt-5 border-t border-outline-variant/50 group-hover:border-outline transition-colors duration-300">
+                      <span className="inline-flex items-center gap-2 text-sm font-medium text-cjp-primary group-hover:text-cjp-accent transition-colors duration-300">
+                        Saiba mais
+                        <ArrowDownRight className="h-4 w-4 group-hover:translate-x-0.5 group-hover:translate-y-0.5 transition-transform duration-300" />
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                {/* Content */}
-                <div className="z-10">
-                  <h3
-                    className={`text-xl font-bold mb-2 ${
-                      isHighlight
-                        ? "text-on-primary"
-                        : "text-cjp-primary"
-                    }`}
-                    style={{
-                      fontFamily: "'Hanken Grotesk', sans-serif",
-                    }}
-                  >
-                    {service.title}
-                  </h3>
-                  <p
-                    className={`text-base leading-relaxed ${
-                      isHighlight
-                        ? "text-white/70"
-                        : "text-on-surface-variant"
-                    }`}
-                  >
-                    {service.description}
-                  </p>
-                </div>
-
-                {/* Highlight badge */}
-                {isHighlight && (
-                  <div className="z-10 mt-auto pt-4 border-t border-cjp-accent/30">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-cjp-accent-light uppercase tracking-wider">
-                      <Zap className="h-3.5 w-3.5" />
-                      Solução Personalizada
-                    </span>
-                  </div>
-                )}
+                {/* Subtle gradient overlay on hover */}
+                <div
+                  className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none ${
+                    isHighlight
+                      ? "bg-gradient-to-br from-white/0 via-white/[0.03] to-white/[0.06]"
+                      : "bg-gradient-to-br from-primary-fixed/0 via-primary-fixed/[0.02] to-primary-fixed/[0.05]"
+                  }`}
+                />
               </StaggerItem>
             );
           })}
         </StaggerContainer>
-
-        <AnimatedSection delay={0.3} className="mt-12 text-center">
-          <a href="/solucoes">
-            <Button
-              variant="outline"
-              className="border-cjp-primary text-cjp-primary hover:bg-cjp-primary hover:text-on-primary h-12 px-8 rounded-lg font-medium text-sm transition-all duration-300"
-            >
-              Ver Todas as Soluções
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </a>
-        </AnimatedSection>
       </div>
     </section>
   );
 }
 
-/* ─── 4. Diferenciais Section ─── */
+/* ─── 4. Image Gallery Section ─── */
+function GallerySection() {
+  return (
+    <section className="py-24 md:py-32 bg-surface-container-lowest relative overflow-hidden">
+      {/* Accent */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-outline-variant to-transparent" />
+
+      <div className="max-w-[1280px] mx-auto px-4 md:px-10 relative z-10">
+        <AnimatedSection className="mb-14">
+          <SectionTag text="Galeria" />
+          <h2
+            className="text-3xl md:text-[40px] font-bold text-cjp-primary tracking-tight mb-4"
+            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+          >
+            Nossas Soluções em Ação
+          </h2>
+          <p className="text-lg text-on-surface-variant max-w-2xl leading-relaxed">
+            Conheça visualmente como nossas plataformas e infraestrutura
+            atendem operações corporativas de alta criticidade.
+          </p>
+        </AnimatedSection>
+
+        <ImageGallery />
+      </div>
+    </section>
+  );
+}
+
+/* ─── 5. Diferenciais Section (Redesigned) ─── */
 function DiferenciaisSection({
   contents,
 }: {
@@ -470,34 +614,45 @@ function DiferenciaisSection({
       ];
 
   const iconCycle = [
-    <Cpu key="cpu" className="h-4 w-4" />,
-    <Server key="server" className="h-4 w-4" />,
-    <Cloud key="cloud" className="h-4 w-4" />,
-    <Zap key="zap" className="h-4 w-4" />,
-    <GitMerge key="git-merge" className="h-4 w-4" />,
-    <Shield key="shield" className="h-4 w-4" />,
-    <Globe key="globe" className="h-4 w-4" />,
-    <Headphones key="headphones" className="h-4 w-4" />,
-    <Search key="search" className="h-4 w-4" />,
-    <Settings key="settings" className="h-4 w-4" />,
+    <Cpu key="cpu" className="h-4.5 w-4.5" />,
+    <Server key="server" className="h-4.5 w-4.5" />,
+    <Cloud key="cloud" className="h-4.5 w-4.5" />,
+    <Zap key="zap" className="h-4.5 w-4.5" />,
+    <GitMerge key="git-merge" className="h-4.5 w-4.5" />,
+    <Shield key="shield" className="h-4.5 w-4.5" />,
+    <Globe key="globe" className="h-4.5 w-4.5" />,
+    <Headphones key="headphones" className="h-4.5 w-4.5" />,
+    <Search key="search" className="h-4.5 w-4.5" />,
+    <Settings key="settings" className="h-4.5 w-4.5" />,
   ];
 
   return (
-    <section className="py-20 md:py-28 relative overflow-hidden bg-[#0a1628]">
-      <div className="absolute inset-0 circuit-pattern opacity-[0.03] pointer-events-none" />
+    <section className="py-24 md:py-32 relative overflow-hidden bg-[#0a1628]">
+      {/* Background effects */}
+      <div className="absolute inset-0 circuit-pattern opacity-[0.02] pointer-events-none" />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            "radial-gradient(ellipse at 20% 50%, rgba(88, 69, 204, 0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(88, 69, 204, 0.05) 0%, transparent 50%)",
+            "radial-gradient(ellipse at 15% 50%, rgba(88, 69, 204, 0.1) 0%, transparent 50%), radial-gradient(ellipse at 85% 80%, rgba(88, 69, 204, 0.06) 0%, transparent 50%)",
         }}
       />
+      {/* Accent line */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-cjp-accent/40 to-transparent" />
 
       <div className="max-w-[1280px] mx-auto px-4 md:px-10 relative z-10">
-        <AnimatedSection className="text-center mb-14">
-          <SectionTagDark text="Diferenciais" />
+        <AnimatedSection className="text-center mb-16">
+          <div className="inline-flex items-center gap-2.5 border border-white/10 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm mb-6">
+            <span className="w-2 h-2 rounded-full bg-cjp-accent pulse-dot" />
+            <span
+              className="text-[11px] text-white/70 tracking-[0.15em] uppercase font-semibold"
+              style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+            >
+              Diferenciais
+            </span>
+          </div>
           <h2
-            className="text-3xl md:text-[32px] font-bold text-white tracking-tight"
+            className="text-3xl md:text-[40px] font-bold text-white tracking-tight"
             style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
           >
             Por que a CJP NET
@@ -508,18 +663,18 @@ function DiferenciaisSection({
           {items.map((item: string, i: number) => (
             <StaggerItem key={i}>
               <motion.div
-                whileHover={{ y: -4, scale: 1.02 }}
+                whileHover={{ y: -6, scale: 1.02 }}
                 transition={{
                   type: "spring",
                   stiffness: 300,
                   damping: 20,
                 }}
-                className="bg-white/[0.05] backdrop-blur-sm border border-white/[0.08] rounded-xl p-5 flex items-start gap-3 hover:bg-white/[0.08] hover:border-cjp-accent/30 transition-colors duration-300 h-full"
+                className="bg-white/[0.04] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-6 flex items-start gap-4 hover:bg-white/[0.08] hover:border-cjp-accent/25 transition-all duration-500 h-full group"
               >
-                <div className="w-8 h-8 rounded-lg bg-cjp-accent/15 flex items-center justify-center text-cjp-accent-light shrink-0 mt-0.5">
+                <div className="w-10 h-10 rounded-xl bg-cjp-accent/12 flex items-center justify-center text-cjp-accent-light shrink-0 mt-0.5 group-hover:scale-110 group-hover:bg-cjp-accent/20 transition-all duration-300">
                   {iconCycle[i % iconCycle.length]}
                 </div>
-                <span className="text-white/85 text-sm font-medium leading-snug">
+                <span className="text-white/80 text-sm font-medium leading-snug">
                   {item}
                 </span>
               </motion.div>
@@ -531,39 +686,66 @@ function DiferenciaisSection({
   );
 }
 
-/* ─── 5. CTA Section ─── */
+/* ─── 6. CTA Section (Redesigned) ─── */
 function CTASection() {
   return (
-    <section className="py-20 md:py-28 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0a1628] via-[#0f1f3a] to-[#0a1628]" />
-      <div className="absolute inset-0 circuit-pattern opacity-[0.03] pointer-events-none" />
-      <div className="absolute top-0 right-0 w-96 h-96 bg-cjp-accent/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-cjp-accent/[0.03] rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl pointer-events-none" />
+    <section className="py-24 md:py-32 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#070d1a] via-[#0c1a33] to-[#111f3c]" />
+      <div className="absolute inset-0 circuit-pattern opacity-[0.02] pointer-events-none" />
+
+      {/* Decorative orbs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cjp-accent/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-cjp-accent/[0.03] rounded-full translate-y-1/2 -translate-x-1/4 blur-3xl pointer-events-none" />
+
+      {/* Accent line */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-cjp-accent/40 to-transparent" />
 
       <div className="max-w-[1280px] mx-auto px-4 md:px-10 relative z-10">
         <AnimatedSection>
           <div className="text-center max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2.5 border border-white/10 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm mb-8">
+              <MessageCircle className="h-3.5 w-3.5 text-cjp-accent-light" />
+              <span
+                className="text-[11px] text-white/70 tracking-[0.15em] uppercase font-semibold"
+                style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+              >
+                Fale Conosco
+              </span>
+            </div>
+
             <h2
-              className="text-3xl md:text-[36px] font-bold text-white mb-6"
+              className="text-3xl md:text-[44px] font-bold text-white mb-6 leading-tight"
               style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
             >
               Pronto para estruturar sua operação?
             </h2>
-            <p className="text-white/60 text-lg mb-10 leading-relaxed">
+            <p className="text-white/45 text-lg mb-12 leading-relaxed">
               Converse com nossos especialistas e descubra como podemos
               transformar processos operacionais complexos em soluções digitais
               eficientes e seguras.
             </p>
-            <a
-              href="https://wa.me/5511914922773"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button className="bg-cjp-accent hover:bg-cjp-accent-light text-white h-14 px-10 font-medium text-base rounded-lg transition-all duration-300 hover:shadow-xl hover:shadow-cjp-accent/25">
-                <MessageCircle className="mr-2 h-5 w-5" />
-                Falar com um Especialista
-              </Button>
-            </a>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a
+                href="https://wa.me/5511914922773"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button className="bg-cjp-accent hover:bg-cjp-accent-light text-white h-14 px-10 font-semibold text-base rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-cjp-accent/30 group">
+                  <MessageCircle className="mr-2.5 h-5 w-5" />
+                  Falar com um Especialista
+                  <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                </Button>
+              </a>
+              <a href="/contato">
+                <Button
+                  variant="outline"
+                  className="border-white/15 text-white hover:bg-white/10 hover:border-white/25 h-14 px-10 font-semibold text-base rounded-xl transition-all duration-300 bg-white/5 backdrop-blur-sm"
+                >
+                  Formulário de Contato
+                </Button>
+              </a>
+            </div>
           </div>
         </AnimatedSection>
       </div>
@@ -580,6 +762,7 @@ export default function HomePage() {
       <HeroSection contents={contents} />
       <QuemSomosSection contents={contents} />
       <ServicesSection services={services} />
+      <GallerySection />
       <DiferenciaisSection contents={contents} />
       <CTASection />
     </PageLayout>

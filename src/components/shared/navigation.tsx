@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, MessageCircle } from "lucide-react";
+import { Menu, X, MessageCircle, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { NavLink, SiteContent } from "@/lib/types";
 import { getContentValue } from "@/lib/types";
@@ -30,16 +30,25 @@ export default function Navigation({ navLinks, contents }: NavigationProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mobile menu on route change - using ref to avoid setState in effect
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    if (isMobileOpen) {
+      setIsMobileOpen(false);
+    }
+  }
+
 
   return (
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+      className={`fixed top-0 w-full z-50 transition-all duration-500 ${
         isScrolled
-          ? "bg-white/90 backdrop-blur-xl shadow-[0_1px_3px_rgba(10,22,40,0.08)] border-b border-[#0a1628]/8"
-          : "bg-white border-b border-transparent"
+          ? "bg-white/95 backdrop-blur-2xl shadow-[0_1px_3px_rgba(10,22,40,0.06)] border-b border-[#0a1628]/6"
+          : "bg-white/80 backdrop-blur-lg border-b border-transparent"
       }`}
     >
       <div className="max-w-[1280px] mx-auto w-full flex justify-between items-center px-4 md:px-10 h-[72px]">
@@ -65,9 +74,9 @@ export default function Navigation({ navLinks, contents }: NavigationProps) {
                 <a
                   key={link.id}
                   href={link.href}
-                  className={`relative text-sm font-medium px-3 py-2 rounded-md transition-colors duration-200 ${
+                  className={`relative text-sm font-medium px-3.5 py-2 rounded-lg transition-all duration-200 ${
                     isActive
-                      ? "text-[#5845cc]"
+                      ? "text-cjp-accent"
                       : "text-[#5c5f6e] hover:text-[#0a1628] hover:bg-[#0a1628]/4"
                   }`}
                 >
@@ -75,7 +84,7 @@ export default function Navigation({ navLinks, contents }: NavigationProps) {
                   {isActive && (
                     <motion.div
                       layoutId="activeNavIndicator"
-                      className="absolute bottom-0 left-3 right-3 h-[2px] bg-[#5845cc] rounded-full"
+                      className="absolute bottom-0 left-3.5 right-3.5 h-[2px] bg-cjp-accent rounded-full"
                       transition={{
                         type: "spring",
                         stiffness: 380,
@@ -88,22 +97,24 @@ export default function Navigation({ navLinks, contents }: NavigationProps) {
             })}
         </nav>
 
-        {/* CTA Button */}
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden lg:inline-flex"
-        >
-          <Button className="bg-[#5845cc] hover:bg-[#4a38b5] text-white h-10 px-5 font-medium text-sm rounded-lg shadow-sm transition-all duration-200 hover:shadow-md gap-2">
-            <MessageCircle className="h-4 w-4" />
-            {specialistCta}
-          </Button>
-        </a>
+        {/* CTA Buttons */}
+        <div className="hidden lg:flex items-center gap-3">
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button className="bg-cjp-accent hover:bg-cjp-accent-light text-white h-10 px-5 font-semibold text-sm rounded-xl shadow-sm transition-all duration-300 hover:shadow-md hover:shadow-cjp-accent/15 gap-2 group">
+              <MessageCircle className="h-4 w-4" />
+              {specialistCta}
+              <svg className="h-3.5 w-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </Button>
+          </a>
+        </div>
 
         {/* Mobile Hamburger */}
         <button
-          className="lg:hidden text-[#0a1628] p-2 -mr-2"
+          className="lg:hidden text-[#0a1628] p-2 -mr-2 hover:bg-[#0a1628]/4 rounded-lg transition-colors"
           onClick={() => setIsMobileOpen(!isMobileOpen)}
           aria-label={isMobileOpen ? "Fechar menu" : "Abrir menu"}
         >
@@ -123,9 +134,9 @@ export default function Navigation({ navLinks, contents }: NavigationProps) {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="lg:hidden bg-white border-t border-[#0a1628]/8 overflow-hidden"
+            className="lg:hidden bg-white/98 backdrop-blur-xl border-t border-[#0a1628]/6 overflow-hidden"
           >
-            <div className="px-4 py-4 flex flex-col gap-1">
+            <div className="px-4 py-5 flex flex-col gap-1">
               {navLinks
                 .sort((a, b) => a.sortOrder - b.sortOrder)
                 .map((link) => {
@@ -137,9 +148,9 @@ export default function Navigation({ navLinks, contents }: NavigationProps) {
                     <a
                       key={link.id}
                       href={link.href}
-                      className={`text-sm font-medium px-3 py-2.5 rounded-lg transition-colors duration-200 ${
+                      className={`text-sm font-medium px-4 py-3 rounded-xl transition-all duration-200 ${
                         isActive
-                          ? "text-[#5845cc] bg-[#5845cc]/8 border-l-2 border-[#5845cc]"
+                          ? "text-cjp-accent bg-cjp-accent/6 border-l-2 border-cjp-accent"
                           : "text-[#5c5f6e] hover:text-[#0a1628] hover:bg-[#0a1628]/4"
                       }`}
                       onClick={() => setIsMobileOpen(false)}
@@ -148,14 +159,14 @@ export default function Navigation({ navLinks, contents }: NavigationProps) {
                     </a>
                   );
                 })}
-              <div className="pt-3 mt-2 border-t border-[#0a1628]/8">
+              <div className="pt-4 mt-3 border-t border-[#0a1628]/6">
                 <a
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setIsMobileOpen(false)}
                 >
-                  <Button className="bg-[#5845cc] hover:bg-[#4a38b5] text-white w-full h-11 font-medium text-sm rounded-lg shadow-sm gap-2">
+                  <Button className="bg-cjp-accent hover:bg-cjp-accent-light text-white w-full h-12 font-semibold text-sm rounded-xl shadow-sm gap-2">
                     <MessageCircle className="h-4 w-4" />
                     {specialistCta}
                   </Button>
