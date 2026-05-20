@@ -58,33 +58,32 @@ export default function ContatoPage() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus("loading");
 
     try {
-      const res = await fetch("/api/contact", {
+      const formData = new FormData(e.currentTarget);
+      formData.append("access_key", "fa80c2ce-ec64-4db2-bd19-56f792c784aa");
+      formData.append(
+        "subject",
+        `[CJP NET] ${form.subject || "Novo contato via site"}`
+      );
+
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          phone: form.phone || "Não informado",
-          subject: form.subject || "Contato via site CJP NET",
-          message: form.message,
-          _subject: `[CJP NET] ${form.subject || "Novo contato via site"}`,
-        }),
+        body: formData,
       });
 
       const data = await res.json();
 
-      if (data.success === true) {
+      if (data.success) {
         setStatus("success");
         setForm(emptyForm);
         setErrorMessage("");
       } else {
         setStatus("error");
-        setErrorMessage(data.message as string || "");
+        setErrorMessage(data.message || "");
       }
     } catch {
       setStatus("error");
