@@ -77,7 +77,7 @@ export default function ContatoPage() {
 
       const data = await res.json();
 
-      if (data.success === "true") {
+      if (data.success === true) {
         setStatus("success");
         setForm(emptyForm);
       } else {
