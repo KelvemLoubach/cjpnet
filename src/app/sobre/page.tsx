@@ -20,6 +20,8 @@ import { getContentValue } from "@/lib/types";
 export default function SobrePage() {
   const { contents } = useSiteData();
 
+  const joaoPhotoUrl = getContentValue(contents, "img_about_joao");
+
   const sobreDescription =
     getContentValue(contents, "sobre_description") ||
     "Com mais de 16 anos de experiência, desenvolvemos plataformas SaaS sob medida para empresas que necessitam centralizar informações, automatizar rotinas operacionais, integrar sistemas e estruturar indicadores estratégicos para apoio à tomada de decisão.";
@@ -81,42 +83,46 @@ export default function SobrePage() {
             <AnimatedSection>
               <div className="relative">
                 <div className="bg-gradient-to-br from-[#0a1628] via-[#162744] to-[#0f1f3a] rounded-2xl overflow-hidden aspect-[4/3] flex items-center justify-center relative">
-                  {/* Decorative grid */}
-                  <div
-                    className="absolute inset-0 opacity-[0.05] pointer-events-none"
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-                      backgroundSize: "40px 40px",
-                    }}
-                  />
-                  {/* Content */}
-                  <div className="relative z-10 text-center px-8">
-                    <div className="w-20 h-20 rounded-full bg-cjp-accent/20 flex items-center justify-center mx-auto mb-4">
-                      <span
-                        className="text-3xl font-bold text-white"
+                  {joaoPhotoUrl ? (
+                    <img
+                      src={joaoPhotoUrl}
+                      alt="João Pessolato - Fundador e CEO"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <>
+                      {/* Decorative grid */}
+                      <div
+                        className="absolute inset-0 opacity-[0.05] pointer-events-none"
                         style={{
-                          fontFamily: "'Hanken Grotesk', sans-serif",
+                          backgroundImage:
+                            "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
+                          backgroundSize: "40px 40px",
                         }}
-                      >
-                        JP
-                      </span>
-                    </div>
-                    <h3
-                      className="text-xl font-bold text-white mb-1"
-                      style={{
-                        fontFamily: "'Hanken Grotesk', sans-serif",
-                      }}
-                    >
-                      João Pessolato
-                    </h3>
-                    <p className="text-white/60 text-sm">
-                      Fundador e CEO
-                    </p>
-                  </div>
-                  {/* Accent glow */}
-                  <div className="absolute -top-8 -right-8 w-32 h-32 bg-cjp-accent/10 rounded-full blur-3xl pointer-events-none" />
-                  <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cjp-accent/5 rounded-full blur-2xl pointer-events-none" />
+                      />
+                      {/* Content */}
+                      <div className="relative z-10 text-center px-8">
+                        <div className="w-20 h-20 rounded-full bg-cjp-accent/20 flex items-center justify-center mx-auto mb-4">
+                          <span
+                            className="text-3xl font-bold text-white"
+                            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                          >
+                            JP
+                          </span>
+                        </div>
+                        <h3
+                          className="text-xl font-bold text-white mb-1"
+                          style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                        >
+                          João Pessolato
+                        </h3>
+                        <p className="text-white/60 text-sm">Fundador e CEO</p>
+                      </div>
+                      {/* Accent glow */}
+                      <div className="absolute -top-8 -right-8 w-32 h-32 bg-cjp-accent/10 rounded-full blur-3xl pointer-events-none" />
+                      <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cjp-accent/5 rounded-full blur-2xl pointer-events-none" />
+                    </>
+                  )}
                 </div>
               </div>
             </AnimatedSection>
