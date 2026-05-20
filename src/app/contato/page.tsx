@@ -62,12 +62,9 @@ export default function ContatoPage() {
     setStatus("loading");
 
     try {
-      const res = await fetch(`https://formsubmit.co/ajax/${contactEmail}`, {
+      const res = await fetch("/api/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
           email: form.email,
@@ -75,14 +72,12 @@ export default function ContatoPage() {
           subject: form.subject || "Contato via site CJP NET",
           message: form.message,
           _subject: `[CJP NET] ${form.subject || "Novo contato via site"}`,
-          _captcha: "false",
-          _template: "table",
         }),
       });
 
       const data = await res.json();
 
-      if (data.success === "true" || res.ok) {
+      if (data.success === "true") {
         setStatus("success");
         setForm(emptyForm);
       } else {
