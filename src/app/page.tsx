@@ -21,7 +21,7 @@ import {
 } from "@/components/shared/animations";
 import { useSiteData } from "@/hooks/use-site-data";
 import { getContentValue } from "@/lib/types";
-import type { Service } from "@/lib/types";
+import type { Service, SiteContent } from "@/lib/types";
 
 const iconMap: Record<string, React.ReactNode> = {
   cloud: <Cloud className="h-6 w-6" />,
@@ -614,7 +614,7 @@ function ServicesSection({ services }: { services: Service[] }) {
 }
 
 /* ─── 4. Image Gallery Section ─── */
-function GallerySection() {
+function GallerySection({ contents }: { contents: SiteContent[] }) {
   return (
     <section className="py-24 md:py-36 bg-surface-container-lowest relative overflow-hidden">
       {/* Accent */}
@@ -635,7 +635,7 @@ function GallerySection() {
           </p>
         </AnimatedSection>
 
-        <ImageGallery />
+        <ImageGallery contents={contents} />
       </div>
     </section>
   );
@@ -814,7 +814,7 @@ export default function HomePage() {
       <HeroSection contents={contents} />
       <QuemSomosSection contents={contents} />
       <ServicesSection services={services} />
-      <GallerySection />
+      <GallerySection contents={contents} />
       <DiferenciaisSection contents={contents} />
       <CTASection />
     </PageLayout>

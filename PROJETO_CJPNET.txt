@@ -1,0 +1,197 @@
+================================================================================
+                        PROJETO CJPNET — DOCUMENTAÇÃO DO CLIENTE
+                        CJP Tecnologia da Internet Ltda
+================================================================================
+
+DATA DE ENTREGA: Maio de 2025
+CNPJ: 11.172.002/0001-84
+
+
+────────────────────────────────────────────────────────────────────────────────
+1. VISÃO GERAL DO PROJETO
+────────────────────────────────────────────────────────────────────────────────
+
+O projeto consiste em um site institucional completo com painel administrativo
+integrado, desenvolvido em Next.js com TypeScript e banco de dados PostgreSQL.
+
+O sistema foi desenvolvido em duas camadas:
+
+  • Site público: apresenta a empresa, serviços, segmentos de atuação, cases
+    de sucesso e canais de contato.
+
+  • Painel administrativo: permite que a equipe da CJP NET edite todo o
+    conteúdo do site sem necessidade de conhecimento técnico.
+
+
+────────────────────────────────────────────────────────────────────────────────
+2. PÁGINAS DO SITE PÚBLICO
+────────────────────────────────────────────────────────────────────────────────
+
+  /               Home — apresentação principal da empresa, serviços em destaque
+                  e chamada para contato.
+
+  /solucoes       Soluções — descrição detalhada das soluções digitais oferecidas
+                  (Plataformas SaaS, Integração de Dados, Governança Operacional
+                  e Soluções Sob Medida).
+
+  /segmentos      Segmentos — atuação por segmento de mercado:
+                  Indicadores de Saúde, Distribuição e Operações Comerciais,
+                  Gestão Documental e Fiscal, Operações Técnicas e Laboratoriais,
+                  Soluções Corporativas Sob Medida.
+
+  /cases          Cases — casos de aplicação reais com descrição completa dos
+                  projetos desenvolvidos e resultados obtidos.
+
+  /sobre          Sobre — história da empresa, missão, visão, valores e
+                  apresentação do fundador.
+
+  /conteudo       Conteúdo — problemas resolvidos, experiência acumulada e
+                  diferenciais competitivos.
+
+  /contato        Contato — formulário de contato integrado.
+
+
+────────────────────────────────────────────────────────────────────────────────
+3. PAINEL ADMINISTRATIVO
+────────────────────────────────────────────────────────────────────────────────
+
+  ACESSO
+  ──────
+  URL:    https://[seu-dominio]/admin
+  Email:  admin@cjpnet.com.br
+  Senha:  admin123
+
+  IMPORTANTE: Altere a senha após o primeiro acesso.
+
+  O QUE PODE SER EDITADO PELO PAINEL
+  ───────────────────────────────────
+  • Todos os textos do site (títulos, descrições, missão, visão, valores etc.)
+  • Serviços: adicionar, editar, reordenar e remover serviços
+  • Segmentos: adicionar, editar, reordenar e remover segmentos
+  • Cases: adicionar, editar, reordenar e remover cases de sucesso
+  • Links de navegação (menu principal)
+  • Links do rodapé
+  • Informações gerais (WhatsApp, Instagram, LinkedIn, CNPJ etc.)
+
+
+────────────────────────────────────────────────────────────────────────────────
+4. TECNOLOGIAS UTILIZADAS
+────────────────────────────────────────────────────────────────────────────────
+
+  FRONTEND
+  ─────────
+  • Next.js 15 (React 19) — framework principal
+  • TypeScript — tipagem e segurança do código
+  • Tailwind CSS — estilização
+  • Framer Motion — animações
+  • Shadcn/UI — componentes de interface
+  • Lucide React — ícones
+
+  BACKEND / API
+  ──────────────
+  • Next.js API Routes — endpoints RESTful integrados ao próprio site
+  • NextAuth.js — autenticação segura com JWT
+  • Bcrypt — criptografia de senhas
+
+  BANCO DE DADOS
+  ───────────────
+  • PostgreSQL (Neon) — banco de dados na nuvem, gratuito
+  • Prisma ORM — acesso ao banco com tipagem segura
+
+  INFRAESTRUTURA
+  ───────────────
+  • Netlify — hospedagem do site e funções serverless
+  • GitHub — repositório do código-fonte e CI/CD automático
+
+
+────────────────────────────────────────────────────────────────────────────────
+5. INFRAESTRUTURA E DEPLOY
+────────────────────────────────────────────────────────────────────────────────
+
+  O projeto está hospedado na Netlify com deploy automático:
+  cada vez que o código for atualizado no GitHub, o site é
+  recompilado e publicado automaticamente em poucos minutos.
+
+  Banco de dados: Neon (neon.tech) — plano gratuito
+  Repositório:   GitHub — KelvemLoubach/cjpnet
+
+  VARIÁVEIS DE AMBIENTE NECESSÁRIAS NA NETLIFY
+  ─────────────────────────────────────────────
+  DATABASE_URL      = Connection string do Neon PostgreSQL
+  NEXTAUTH_SECRET   = Chave secreta para autenticação (qualquer texto longo)
+
+  Estas variáveis devem estar configuradas em:
+  Netlify → Site configuration → Environment variables
+
+
+────────────────────────────────────────────────────────────────────────────────
+6. PROCEDIMENTO DE PRIMEIRO ACESSO (PÓS-DEPLOY)
+────────────────────────────────────────────────────────────────────────────────
+
+  Após o deploy inicial, execute UMA VEZ o seed para popular o banco:
+
+    curl -X POST https://[seu-dominio]/api/seed
+
+  Ou acesse no navegador com uma extensão que permite POST (ex: Talend API Tester).
+
+  O seed cria:
+  • Usuário administrador (admin@cjpnet.com.br / admin123)
+  • Todos os textos do site
+  • Serviços, Segmentos, Cases e links de navegação
+
+
+────────────────────────────────────────────────────────────────────────────────
+7. MANUTENÇÃO E ATUALIZAÇÕES
+────────────────────────────────────────────────────────────────────────────────
+
+  ATUALIZAR CONTEÚDO
+  ──────────────────
+  Todo o conteúdo pode ser atualizado pelo Painel Administrativo sem necessidade
+  de alterar código ou fazer novo deploy.
+
+  ATUALIZAR CÓDIGO
+  ─────────────────
+  1. Fazer alterações no código localmente
+  2. git add . && git commit -m "descricao da mudança"
+  3. git push
+  4. A Netlify detecta o push e faz o deploy automaticamente
+
+  BANCO DE DADOS — BACKUP
+  ────────────────────────
+  O Neon realiza backups automáticos. Para backup manual, acesse:
+  neon.tech → seu projeto → Branches → Restore point
+
+
+────────────────────────────────────────────────────────────────────────────────
+8. ESTRUTURA DE ARQUIVOS DO PROJETO
+────────────────────────────────────────────────────────────────────────────────
+
+  CJPNET/
+  ├── src/
+  │   ├── app/                  Páginas e rotas da aplicação
+  │   │   ├── admin/            Painel administrativo
+  │   │   ├── api/              Endpoints da API (cases, segments, auth etc.)
+  │   │   ├── cases/            Página de cases
+  │   │   ├── segmentos/        Página de segmentos
+  │   │   ├── solucoes/         Página de soluções
+  │   │   ├── sobre/            Página sobre
+  │   │   ├── contato/          Página de contato
+  │   │   └── page.tsx          Home
+  │   ├── components/           Componentes reutilizáveis
+  │   ├── hooks/                Hooks personalizados (busca de dados)
+  │   └── lib/                  Configurações (auth, banco, tipos)
+  ├── prisma/
+  │   └── schema.prisma         Estrutura do banco de dados
+  ├── public/                   Imagens e arquivos estáticos
+  ├── netlify.toml              Configuração do deploy na Netlify
+  └── package.json              Dependências do projeto
+
+
+────────────────────────────────────────────────────────────────────────────────
+9. CONTATOS E SUPORTE
+────────────────────────────────────────────────────────────────────────────────
+
+  Para dúvidas técnicas, suporte ou novas funcionalidades, entre em contato
+  com a equipe de desenvolvimento responsável pelo projeto.
+
+================================================================================

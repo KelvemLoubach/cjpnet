@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
+import type { SiteContent } from "@/lib/types";
 
 interface GalleryImage {
   src: string;
@@ -11,7 +12,7 @@ interface GalleryImage {
   description: string;
 }
 
-const galleryImages: GalleryImage[] = [
+const defaultGalleryImages: GalleryImage[] = [
   {
     src: "/gallery/dashboard.png",
     alt: "Dashboard de Gestão Corporativa",
@@ -50,7 +51,16 @@ const galleryImages: GalleryImage[] = [
   },
 ];
 
-export default function ImageGallery() {
+function buildGalleryImages(contents: SiteContent[]): GalleryImage[] {
+  return defaultGalleryImages.map((img, i) => {
+    const key = `img_gallery_${i + 1}`;
+    const dbValue = contents.find((c) => c.key === key)?.value;
+    return dbValue ? { ...img, src: dbValue } : img;
+  });
+}
+
+export default function ImageGallery({ contents = [] }: { contents?: SiteContent[] }) {
+  const galleryImages = buildGalleryImages(contents);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const openLightbox = (index: number) => setSelectedIndex(index);
