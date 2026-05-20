@@ -36,6 +36,7 @@ export default function ContatoPage() {
   const { contents } = useSiteData();
   const [form, setForm] = useState<FormData>(emptyForm);
   const [status, setStatus] = useState<FormStatus>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const instagramUrl =
     getContentValue(contents, "instagram_url") ||
@@ -80,11 +81,14 @@ export default function ContatoPage() {
       if (data.success === true) {
         setStatus("success");
         setForm(emptyForm);
+        setErrorMessage("");
       } else {
         setStatus("error");
+        setErrorMessage(data.message as string || "");
       }
     } catch {
       setStatus("error");
+      setErrorMessage("Erro de conexão");
     }
   };
 
@@ -257,6 +261,11 @@ export default function ContatoPage() {
                       <p className="text-sm font-semibold text-red-800">
                         Não foi possível enviar a mensagem.
                       </p>
+                      {errorMessage && (
+                        <p className="text-xs text-red-700 font-mono mt-1 break-all">
+                          {errorMessage}
+                        </p>
+                      )}
                       <p className="text-xs text-red-600 mt-0.5">
                         Tente pelo WhatsApp ou envie para{" "}
                         <a
