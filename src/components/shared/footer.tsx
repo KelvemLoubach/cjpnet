@@ -11,7 +11,7 @@ interface FooterProps {
 }
 
 export default function Footer({ footerLinks, contents }: FooterProps) {
-  const siteName = getContentValue(contents, "site_name") || "CJP NET";
+  const siteName = getContentValue(contents, "site_name");
   const copyright =
     getContentValue(contents, "footer_copyright") ||
     "© 2025 CJP Tecnologia da Internet Ltda. Todos os direitos reservados.";

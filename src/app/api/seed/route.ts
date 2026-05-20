@@ -25,6 +25,7 @@ export async function POST() {
       { key: "site_razao_social", value: "CJP Tecnologia da Internet Ltda", type: "text", group: "general" },
       { key: "site_cnpj", value: "11.172.002/0001-84", type: "text", group: "general" },
       { key: "whatsapp_number", value: "+5511914922773", type: "text", group: "general" },
+      { key: "contact_email", value: "contato@cjpnet.com.br", type: "text", group: "general" },
       { key: "instagram_url", value: "https://www.instagram.com/cjpnet", type: "text", group: "general" },
       { key: "linkedin_url", value: "https://www.linkedin.com/company/cjpnet/", type: "text", group: "general" },
 
