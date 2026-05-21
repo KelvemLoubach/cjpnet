@@ -64,7 +64,7 @@ export default function ContatoPage() {
 
     try {
       const formData = new FormData(e.currentTarget);
-      formData.append("access_key", "fa80c2ce-ec64-4db2-bd19-56f792c784aa");
+      formData.append("access_key", "4edd3c5c-b1fe-4b0f-9b58-92199dbbe0da");
       formData.append(
         "subject",
         `[CJP NET] ${form.subject || "Novo contato via site"}`
