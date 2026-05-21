@@ -19,7 +19,7 @@ const defaultNavLinks: NavLink[] = [
   { id: "3", label: "Segmentos", href: "/segmentos", active: false, sortOrder: 2 },
   { id: "4", label: "Cases", href: "/cases", active: false, sortOrder: 3 },
   { id: "5", label: "Sobre", href: "/sobre", active: false, sortOrder: 4 },
-  { id: "6", label: "Conteúdo", href: "/conteudo", active: false, sortOrder: 5 },
+  { id: "6", label: "Diferenciais", href: "/conteudo", active: false, sortOrder: 5 },
   { id: "7", label: "Contato", href: "/contato", active: false, sortOrder: 6 },
 ];
 

@@ -11,7 +11,6 @@ interface FooterProps {
 }
 
 export default function Footer({ footerLinks, contents }: FooterProps) {
-  const siteName = getContentValue(contents, "site_name");
   const copyright =
     getContentValue(contents, "footer_copyright") ||
     "© 2025 CJP Tecnologia da Internet Ltda. Todos os direitos reservados.";
@@ -43,12 +42,6 @@ export default function Footer({ footerLinks, contents }: FooterProps) {
                 alt="CJP"
                 className="h-9 w-auto transition-transform duration-300 group-hover:scale-105"
               />
-              <span
-                className="text-xl font-bold text-white tracking-tight"
-                style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-              >
-                {siteName}
-              </span>
             </a>
             <p className="mt-5 text-sm text-white/40 leading-relaxed max-w-sm">
               Soluções digitais corporativas para operações que exigem controle,
