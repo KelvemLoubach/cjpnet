@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CJP NET - Soluções Digitais para Operações Corporativas",
+  title: "CJP - Soluções Digitais para Operações Corporativas",
   description: "Desenvolvemos plataformas digitais sob medida para empresas que precisam centralizar informações, automatizar processos, integrar sistemas e estruturar operações com segurança, estabilidade e visão gerencial.",
-  keywords: ["CJP NET", "Soluções Digitais", "SaaS", "Integração", "Governança", "Plataformas Corporativas", "Indicadores Estratégicos"],
+  keywords: ["CJP", "Soluções Digitais", "SaaS", "Integração", "Governança", "Plataformas Corporativas", "Indicadores Estratégicos"],
   icons: {
     icon: "/logo.png",
   },

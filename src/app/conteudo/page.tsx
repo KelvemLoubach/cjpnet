@@ -226,7 +226,7 @@ export default function ConteudoPage() {
               className="text-3xl md:text-[32px] font-bold text-white tracking-tight"
               style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
             >
-              Por que a CJP NET
+              Por que a CJP
             </h2>
           </AnimatedSection>
 

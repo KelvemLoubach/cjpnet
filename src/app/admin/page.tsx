@@ -72,7 +72,7 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <img src="/logo.png" alt="CJP NET" className="h-10 mx-auto mb-4" />
+          <img src="/logo.png" alt="CJP" className="h-10 mx-auto mb-4" />
           <p className="text-on-surface-variant">Painel Administrativo</p>
         </div>
 
@@ -302,7 +302,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       <aside className="w-64 bg-cjp-primary text-on-primary flex flex-col shrink-0">
         <div className="p-6 border-b border-on-primary/20">
           <a href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="CJP NET" className="h-7 brightness-0 invert" />
+            <img src="/logo.png" alt="CJP" className="h-7 brightness-0 invert" />
           </a>
           <p className="text-inverse-primary text-xs mt-2">Painel Administrativo</p>
         </div>

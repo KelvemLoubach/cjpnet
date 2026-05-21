@@ -12,7 +12,7 @@ export async function POST() {
         data: {
           email: "admin@cjpnet.com.br",
           password: hashedPassword,
-          name: "Administrador CJP NET",
+          name: "Administrador CJP",
           role: "admin",
         },
       });
@@ -21,7 +21,7 @@ export async function POST() {
     // Seed site content - ALL content from the document
     const contentData = [
       // General
-      { key: "site_name", value: "CJP NET", type: "text", group: "general" },
+      { key: "site_name", value: "CJP", type: "text", group: "general" },
       { key: "site_razao_social", value: "CJP Tecnologia da Internet Ltda", type: "text", group: "general" },
       { key: "site_cnpj", value: "11.172.002/0001-84", type: "text", group: "general" },
       { key: "whatsapp_number", value: "+5511914922773", type: "text", group: "general" },
@@ -37,7 +37,7 @@ export async function POST() {
       { key: "hero_cta_secondary", value: "Ver Casos de Aplicação", type: "text", group: "hero" },
 
       // Quem Somos (home page summary)
-      { key: "quem_somos_summary", value: "A CJP NET atua no desenvolvimento e operação de soluções digitais corporativas voltadas à organização, integração e gestão de processos empresariais.", type: "text", group: "sobre" },
+      { key: "quem_somos_summary", value: "A CJP atua no desenvolvimento e operação de soluções digitais corporativas voltadas à organização, integração e gestão de processos empresariais.", type: "text", group: "sobre" },
 
       // Sobre page
       { key: "sobre_description", value: "Com mais de 16 anos de experiência, desenvolvemos plataformas SaaS sob medida para empresas que necessitam centralizar informações, automatizar rotinas operacionais, integrar sistemas e estruturar indicadores estratégicos para apoio à tomada de decisão.", type: "text", group: "sobre" },
@@ -87,7 +87,7 @@ export async function POST() {
       { label: "Segmentos", href: "/segmentos", active: false, sortOrder: 2 },
       { label: "Cases", href: "/cases", active: false, sortOrder: 3 },
       { label: "Sobre", href: "/sobre", active: false, sortOrder: 4 },
-      { label: "Conteúdo", href: "/conteudo", active: false, sortOrder: 5 },
+      { label: "Diferenciais", href: "/conteudo", active: false, sortOrder: 5 },
       { label: "Contato", href: "/contato", active: false, sortOrder: 6 },
     ];
 

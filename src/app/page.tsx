@@ -388,7 +388,7 @@ function QuemSomosSection({
 }) {
   const summary =
     getContentValue(contents, "quem_somos_summary") ||
-    "A CJP NET atua no desenvolvimento e operação de soluções digitais corporativas voltadas à organização, integração e gestão de processos empresariais.";
+    "A CJP atua no desenvolvimento e operação de soluções digitais corporativas voltadas à organização, integração e gestão de processos empresariais.";
 
   const stats = [
     { value: 16, suffix: "+", label: "Anos de Experiência", icon: <TrendingUp className="h-5 w-5" />, description: "Atuação no mercado" },
@@ -705,7 +705,7 @@ function DiferenciaisSection({
             className="text-3xl md:text-[44px] font-bold tracking-tight"
             style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
           >
-            <span className="text-gradient">Por que a CJP NET</span>
+            <span className="text-gradient">Por que a CJP</span>
           </h2>
         </AnimatedSection>
 

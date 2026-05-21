@@ -51,7 +51,7 @@ export default function WhatsAppButton() {
               Precisa de ajuda?
             </p>
             <p className="text-xs text-[#5c5f6e] leading-relaxed">
-              Fale com um especialista da CJP NET pelo WhatsApp.
+              Fale com um especialista da CJP pelo WhatsApp.
             </p>
             {/* Arrow */}
             <div className="absolute -bottom-1.5 right-8 w-3 h-3 bg-white border-r border-b border-gray-100 rotate-45" />

@@ -64,7 +64,7 @@ export default function SobrePage() {
       <PageHero
         tag="Sobre"
         title="Quem Somos"
-        description="A CJP NET atua no desenvolvimento e operação de soluções digitais corporativas voltadas à organização, integração e gestão de processos empresariais."
+        description="A CJP atua no desenvolvimento e operação de soluções digitais corporativas voltadas à organização, integração e gestão de processos empresariais."
       />
 
       {/* Main About Section */}

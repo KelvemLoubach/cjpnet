@@ -42,7 +42,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* CJP NET Design System - Dark Blue / Graphite / White / Purple Tech */
+  /* CJP Design System - Dark Blue / Graphite / White / Purple Tech */
   --color-surface-tint: #4a5fa8;
   --color-surface: #f5f6f8;
   --color-surface-dim: #d9dae0;
@@ -110,7 +110,7 @@
   --color-on-background: #1a1c23;
   --color-surface-variant: #e3e4ee;
 
-  /* CJP NET Fonts */
+  /* CJP Fonts */
   --font-headline: var(--font-hanken);
   --font-body: var(--font-inter);
 }

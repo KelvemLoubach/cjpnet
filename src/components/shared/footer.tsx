@@ -40,7 +40,7 @@ export default function Footer({ footerLinks, contents }: FooterProps) {
             <a href="/" className="flex items-center gap-2.5 group">
               <img
                 src="/logo.png"
-                alt="CJP NET"
+                alt="CJP"
                 className="h-9 w-auto transition-transform duration-300 group-hover:scale-105"
               />
               <span
@@ -61,7 +61,7 @@ export default function Footer({ footerLinks, contents }: FooterProps) {
                 href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Instagram CJP NET"
+                aria-label="Instagram CJP"
                 className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-cjp-accent/20 border border-white/8 hover:border-cjp-accent/30 text-white/40 hover:text-cjp-accent-light transition-all duration-300"
               >
                 <Instagram className="h-4 w-4" />
@@ -70,7 +70,7 @@ export default function Footer({ footerLinks, contents }: FooterProps) {
                 href={linkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="LinkedIn CJP NET"
+                aria-label="LinkedIn CJP"
                 className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-cjp-accent/20 border border-white/8 hover:border-cjp-accent/30 text-white/40 hover:text-cjp-accent-light transition-all duration-300"
               >
                 <Linkedin className="h-4 w-4" />
@@ -79,7 +79,7 @@ export default function Footer({ footerLinks, contents }: FooterProps) {
                 href="https://wa.me/5511914922773"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="WhatsApp CJP NET"
+                aria-label="WhatsApp CJP"
                 className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-[#25D366]/20 border border-white/8 hover:border-[#25D366]/30 text-white/40 hover:text-[#25D366] transition-all duration-300"
               >
                 <MessageCircle className="h-4 w-4" />

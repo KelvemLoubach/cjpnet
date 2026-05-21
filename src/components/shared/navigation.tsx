@@ -68,7 +68,7 @@ export default function Navigation({ navLinks, contents }: NavigationProps) {
         <a href="/" className="flex items-center group">
           <img
             src="/logo.png"
-            alt="CJP NET"
+            alt="CJP"
             className="h-8 w-auto transition-all duration-500 group-hover:scale-105"
           />
         </a>
