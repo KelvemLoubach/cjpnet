@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useSyncExternalStore, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LogOut, Save, Plus, Trash2, Edit3, ImageIcon, ExternalLink, X,
   Cloud, GitMerge, ShieldCheck, Blocks, Zap, Globe, Database, Lock, Cpu, BarChart3,
-  LayoutDashboard, FileText, Settings, ArrowLeft, Target, Briefcase,
+  LayoutDashboard, FileText, Settings, ArrowLeft, Target, Briefcase, KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,10 +31,10 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 const iconNames = Object.keys(iconMap);
 
-type AdminTab = "conteudo" | "imagens" | "servicos" | "segmentos" | "cases" | "navegacao" | "footer";
+type AdminTab = "conteudo" | "imagens" | "servicos" | "segmentos" | "cases" | "navegacao" | "footer" | "configuracoes";
 
 // ==================== LOGIN SCREEN ====================
-function LoginScreen({ onLogin }: { onLogin: () => void }) {
+function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -44,24 +45,15 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
     setLoading(true);
     setError("");
 
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
+    const result = await signIn("credentials", { email, password, redirect: false });
 
-      if (res.ok && data.success) {
-        onLogin();
-      } else {
-        setError(data.error || "Credenciais inválidas");
-      }
-    } catch {
-      setError("Erro ao conectar");
-    } finally {
-      setLoading(false);
+    if (result?.ok) {
+      // useSession updates automatically — no action needed
+    } else {
+      setError("Email ou senha inválidos");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -294,6 +286,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     { key: "cases", label: "Cases", icon: <Briefcase className="h-4 w-4" /> },
     { key: "navegacao", label: "Navegação", icon: <LayoutDashboard className="h-4 w-4" /> },
     { key: "footer", label: "Footer", icon: <Settings className="h-4 w-4" /> },
+    { key: "configuracoes", label: "Configurações", icon: <KeyRound className="h-4 w-4" /> },
   ];
 
   return (
@@ -361,6 +354,9 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             )}
             {activeTab === "footer" && (
               <FooterTab key="footer" footerLinks={footerLinks} onUpdate={updateFooterLink} onDelete={deleteFooterLink} contents={contents} onContentUpdate={updateContent} />
+            )}
+            {activeTab === "configuracoes" && (
+              <SettingsTab key="configuracoes" />
             )}
           </AnimatePresence>
         </div>
@@ -1275,26 +1271,130 @@ function FooterTab({ footerLinks, onUpdate, onDelete, contents, onContentUpdate 
   );
 }
 
-// ==================== MAIN ADMIN PAGE ====================
-const emptySubscribe = () => () => {};
+// ==================== SETTINGS TAB ====================
+function SettingsTab() {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-export default function AdminPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { data: session } = useSession();
+  const email = session?.user?.email ?? "";
 
-  const mounted = useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Erro", description: "As senhas não coincidem.", variant: "destructive" });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({ title: "Erro", description: "A nova senha deve ter pelo menos 6 caracteres.", variant: "destructive" });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, currentPassword, newPassword }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        toast({ title: "Senha alterada com sucesso!" });
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        toast({ title: "Erro", description: data.error ?? "Falha ao alterar senha.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Erro", description: "Erro ao conectar.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="space-y-6"
+    >
+      <div>
+        <h2 className="text-2xl font-bold text-on-surface">Configurações</h2>
+        <p className="text-on-surface-variant mt-1">Altere a senha de acesso ao painel administrativo.</p>
+      </div>
+
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 max-w-md">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-cjp-primary/10 rounded-lg">
+            <KeyRound className="h-5 w-5 text-cjp-primary" />
+          </div>
+          <div>
+            <p className="font-medium text-on-surface">Alterar Senha</p>
+            <p className="text-xs text-on-surface-variant">{email}</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="currentPassword">Senha atual</Label>
+            <Input
+              id="currentPassword"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <Separator />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="newPassword">Nova senha</Label>
+            <Input
+              id="newPassword"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Mínimo 6 caracteres"
+              required
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Repita a nova senha"
+              required
+            />
+          </div>
+          <Button type="submit" disabled={loading} className="bg-cjp-primary hover:bg-cjp-primary/90 text-on-primary mt-2">
+            {loading ? "Salvando..." : "Alterar Senha"}
+          </Button>
+        </form>
+      </div>
+    </motion.div>
   );
+}
 
-  const [authChecked, setAuthChecked] = useState(false);
-  if (mounted && !authChecked) {
-    setAuthChecked(true);
-    const auth = sessionStorage.getItem("cjp_admin_auth");
-    if (auth === "true") setIsAuthenticated(true);
-  }
+// ==================== MAIN ADMIN PAGE ====================
+export default function AdminPage() {
+  const { status } = useSession();
 
-  if (!mounted) {
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+  };
+
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface">
         <div className="w-8 h-8 border-2 border-cjp-primary border-t-transparent rounded-full animate-spin" />
@@ -1302,18 +1402,8 @@ export default function AdminPage() {
     );
   }
 
-  const handleLogin = () => {
-    sessionStorage.setItem("cjp_admin_auth", "true");
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    sessionStorage.removeItem("cjp_admin_auth");
-    setIsAuthenticated(false);
-  };
-
-  if (!isAuthenticated) {
-    return <LoginScreen onLogin={handleLogin} />;
+  if (status === "unauthenticated") {
+    return <LoginScreen />;
   }
 
   return <AdminDashboard onLogout={handleLogout} />;

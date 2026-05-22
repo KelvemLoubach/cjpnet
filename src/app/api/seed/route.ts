@@ -2,21 +2,24 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
+export async function GET() {
+  return POST();
+}
+
 export async function POST() {
   try {
-    // Create default admin user
-    const existingUser = await db.user.findUnique({ where: { email: "admin@cjpnet.com.br" } });
-    if (!existingUser) {
-      const hashedPassword = await bcrypt.hash("admin123", 10);
-      await db.user.create({
-        data: {
-          email: "admin@cjpnet.com.br",
-          password: hashedPassword,
-          name: "Administrador CJP",
-          role: "admin",
-        },
-      });
-    }
+    // Create or reset default admin user
+    const hashedPassword = await bcrypt.hash("admin123", 10);
+    await db.user.upsert({
+      where: { email: "admin@cjpnet.com.br" },
+      update: { password: hashedPassword },
+      create: {
+        email: "admin@cjpnet.com.br",
+        password: hashedPassword,
+        name: "Administrador CJP",
+        role: "admin",
+      },
+    });
 
     // Seed site content - ALL content from the document
     const contentData = [

@@ -28,7 +28,15 @@ export default function Navigation({ navLinks, contents }: NavigationProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
 
-  const links = navLinks.length > 0 ? navLinks : defaultNavLinks;
+  const rawLinks = navLinks.length > 0 ? navLinks : defaultNavLinks;
+  const seen = new Set<string>();
+  const links = rawLinks
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .filter((link) => {
+      if (seen.has(link.href)) return false;
+      seen.add(link.href);
+      return true;
+    });
 
   const specialistCta =
     getContentValue(contents, "hero_cta_specialist") ||
@@ -76,7 +84,6 @@ export default function Navigation({ navLinks, contents }: NavigationProps) {
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex gap-0.5 items-center">
           {links
-            .sort((a, b) => a.sortOrder - b.sortOrder)
             .map((link) => {
               const isActive =
                 link.href === "/"
@@ -172,7 +179,6 @@ export default function Navigation({ navLinks, contents }: NavigationProps) {
           >
             <div className="px-4 py-5 flex flex-col gap-1">
               {links
-                .sort((a, b) => a.sortOrder - b.sortOrder)
                 .map((link) => {
                   const isActive =
                     link.href === "/"
