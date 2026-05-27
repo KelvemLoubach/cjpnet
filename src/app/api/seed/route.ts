@@ -12,7 +12,7 @@ export async function POST() {
     const hashedPassword = await bcrypt.hash("admin123", 10);
     await db.user.upsert({
       where: { email: "admin@cjpnet.com.br" },
-      update: { password: hashedPassword },
+      update: {},
       create: {
         email: "admin@cjpnet.com.br",
         password: hashedPassword,
