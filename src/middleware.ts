@@ -6,11 +6,13 @@ const secret = process.env.NEXTAUTH_SECRET || "cjp-net-cms-secret-key-2024";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // API routes (except /api/auth/* and /api/seed) require a valid NextAuth session
+  // GET requests to public content APIs are accessible without authentication
+  // POST, PUT, DELETE require a valid NextAuth session
   if (
     pathname.startsWith("/api/") &&
     !pathname.startsWith("/api/auth/") &&
-    pathname !== "/api/seed"
+    pathname !== "/api/seed" &&
+    request.method !== "GET"
   ) {
     const token = await getToken({ req: request, secret });
     if (!token) {
